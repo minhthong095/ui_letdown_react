@@ -1,15 +1,8 @@
 import { NavigationActions } from 'react-navigation'
 
-var index = 0
-
-// init
-function i() {
-    return (index++).toString();
-}
-
 const Stack = {
-    Scan: i(),
-    ScanCamera: i()
+    Scan: 'Scan',
+    ScanCamera: 'ScanCamera',
 }
 
 var navigation;

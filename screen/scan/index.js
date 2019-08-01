@@ -17,9 +17,8 @@ const RNXCamera = props =>
 
 export const Scan = () => {
 
-    const [isOpenCamera, setOpenCamera] = useState(false);
     const [isAskPermission, setAskPermission] = useState(false);
-    // const [isEnableScanBtn, setEnableScanBtn] = useState(false)
+    const isEnableScanBtn = useRef(false)
     const isAlreadyInit = useRef(null)
 
     useEffect(_ => {
@@ -36,8 +35,14 @@ export const Scan = () => {
         PermissionsAndroid
             .check(PermissionsAndroid.PERMISSIONS.CAMERA)
             .then(checked => {
-                if (!checked) setAskPermission(true)
-                else setAskPermission(false)
+                if (!checked) {
+                    setAskPermission(true)
+                    isEnableScanBtn.current = false
+                }
+                else {
+                    setAskPermission(false)
+                    isEnableScanBtn.current = true
+                }
             })
     }
 
@@ -47,23 +52,9 @@ export const Scan = () => {
             .then(result => {
                 if (result != PermissionsAndroid.RESULTS.GRANTED)
                     setAskPermission(true)
-            })
-    }
 
-    function openCameraWithPermissionGranted() {
-        setAskPermission(false)
-        console.log('A: ' + Math.floor(Date.now()))
-        Navigation.navigate(Stack.ScanCamera)
-    }
-
-    function requestCameraToOpen() {
-        PermissionsAndroid
-            .request(PermissionsAndroid.PERMISSIONS.CAMERA)
-            .then(result => {
                 if (result == PermissionsAndroid.RESULTS.GRANTED)
-                    openCameraWithPermissionGranted()
-                else
-                    setAskPermission(true)
+                    isEnableScanBtn.current = true
             })
     }
 
@@ -75,20 +66,23 @@ export const Scan = () => {
                     setAskPermission(true)
                 else if (result == PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN)
                     OpenSetting.openAppSetting()
-                else setAskPermission(false)
+                else {
+                    setAskPermission(false)
+                    isEnableScanBtn.current = true
+                }
             })
     }
 
     function openCamera() {
-        PermissionsAndroid
-            .check(PermissionsAndroid.PERMISSIONS.CAMERA)
-            .then(check => {
-                if (!check) requestCameraToOpen()
-                else openCameraWithPermissionGranted()
-            });
+        if (isEnableScanBtn.current == true)
+            Navigation.navigate(Stack.ScanCamera)
     }
 
     console.log('Render Bae');
+
+    function getActiveScanBtn() {
+        return isEnableScanBtn.current == true ? 0.2 : 1
+    }
 
     return (
         <Container>
@@ -104,7 +98,7 @@ export const Scan = () => {
                     </PermissionView>
                 }
             </ContainerVisualCamera>
-            <TouchableOpacity onPress={openCamera}>
+            <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>
                 </ScanButton>
