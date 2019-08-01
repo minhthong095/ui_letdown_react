@@ -1,16 +1,14 @@
 import styled from 'styled-components'
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Modal } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react';
 import { PermissionsAndroid, NativeModules, AppState } from 'react-native';
 import { RNCamera } from 'react-native-camera'
+import { Navigation, Stack } from '../../navigation/navigation';
 const { OpenSetting } = NativeModules
-
-function onPress() {
-    console.log('Ahihi');
-}
 
 const RNXCamera = props =>
     <RNCamera
+        onCameraReady={_ => { console.log('B: ' + Math.floor(Date.now())) }}
         orientation={'portrait'}
         style={props.style}
         captureAudio={false}
@@ -21,10 +19,10 @@ export const Scan = () => {
 
     const [isOpenCamera, setOpenCamera] = useState(false);
     const [isAskPermission, setAskPermission] = useState(false);
+    // const [isEnableScanBtn, setEnableScanBtn] = useState(false)
     const isAlreadyInit = useRef(null)
 
     useEffect(_ => {
-        console.log('Effect Bae!!');
         requestCameraCheckFirstime();
         AppState.addEventListener('change', (state) => {
             if (state == 'active' && isAlreadyInit.current != null)
@@ -53,8 +51,9 @@ export const Scan = () => {
     }
 
     function openCameraWithPermissionGranted() {
-        setOpenCamera(true)
         setAskPermission(false)
+        console.log('A: ' + Math.floor(Date.now()))
+        Navigation.navigate(Stack.ScanCamera)
     }
 
     function requestCameraToOpen() {
@@ -66,7 +65,6 @@ export const Scan = () => {
                 else
                     setAskPermission(true)
             })
-
     }
 
     function requestCameraToCheck() {
@@ -90,13 +88,11 @@ export const Scan = () => {
             });
     }
 
-    console.log('Render Bae!!');
+    console.log('Render Bae');
 
     return (
         <Container>
-            {/* <RNXStyledCamera /> */}
             <ContainerVisualCamera>
-                {isOpenCamera && <VisualCamera />}
                 {isAskPermission &&
                     <PermissionView>
                         <AskPermissionText>YOU NEED TO APPROVE CAMERA PERMISSION.</AskPermissionText>
@@ -119,7 +115,6 @@ export const Scan = () => {
 
 const ContainerVisualCamera = styled(View)`
             flex: 1;
-            background-color: transparent;
             justify-content: center;
             align-items: center;
         `
@@ -137,13 +132,6 @@ const TurnOnText = styled(Text)`
             color: blue;
             font-size: 22;
         `
-
-const AskPermission = styled(View)`
-            width: 100;
-            height: 200;
-            background-color: black;
-        `
-
 const AskPermissionText = styled(Text)`
             font-size: 22;
             color: black;
@@ -157,10 +145,8 @@ const VisualCamera = styled(View)`
             align-items: center;
         `
 
-const RNXStyledCamera = styled(RNXCamera)`
+const StyledRNXCamera = styled(RNXCamera)`
             flex: 1;
-            justify-content: flex-end;
-            align-items: center;
         `
 
 const Container = styled(View)`
