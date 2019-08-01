@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "75651901115",
+    "firebase_url": "https://mlkittest-c86c5.firebaseio.com",
+    "project_id": "mlkittest-c86c5",
+    "storage_bucket": "mlkittest-c86c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75651901115:android:18ac15d73b67a751",
+        "android_client_info": {
+          "package_name": "com.ui_letdown_react"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "75651901115-2a4r7ec521scnhdur46vqo4t3nme11hb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA43XT0EyQtQdz-s3HRZIYNSlNOVVPijtw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "75651901115-2a4r7ec521scnhdur46vqo4t3nme11hb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
