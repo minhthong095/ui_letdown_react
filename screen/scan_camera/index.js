@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { RNCamera } from 'react-native-camera'
 import styled from 'styled-components'
 import { View, Image, TouchableOpacity, StyleSheet } from 'react-native'
 import { ImgUrl } from '../../global/img_url';

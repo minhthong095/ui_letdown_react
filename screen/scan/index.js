@@ -2,18 +2,8 @@ import styled from 'styled-components'
 import { View, Text, TouchableOpacity, Modal } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react';
 import { PermissionsAndroid, NativeModules, AppState } from 'react-native';
-import { RNCamera } from 'react-native-camera'
 import { Navigation, Stack } from '../../navigation/navigation';
 const { OpenSetting } = NativeModules
-
-const RNXCamera = props =>
-    <RNCamera
-        onCameraReady={_ => { console.log('B: ' + Math.floor(Date.now())) }}
-        orientation={'portrait'}
-        style={props.style}
-        captureAudio={false}
-        autoFocus={RNCamera.Constants.AutoFocus.off}
-    />
 
 export const Scan = () => {
 
@@ -138,11 +128,6 @@ const VisualCamera = styled(View)`
             justify-content: center;
             align-items: center;
         `
-
-const StyledRNXCamera = styled(RNXCamera)`
-            flex: 1;
-        `
-
 const Container = styled(View)`
             flex: 1;
             background-color: white;
