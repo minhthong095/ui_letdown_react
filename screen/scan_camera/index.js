@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { RNCamera } from 'react-native-camera'
 import styled from 'styled-components'
-import { View, Image, TouchableOpacity } from 'react-native'
-import { Url } from '../../global/url';
-
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native'
+import { ImgUrl } from '../../global/img_url';
+import { FlashOnOff } from '../../component/flash_on_off';
 export const ScanCamera = _ => {
     return (
         <Container>
@@ -26,21 +26,45 @@ export const ScanCamera = _ => {
                     height: 20
                 }}
             /> */}
-            <TouchableOpacity>
-                <Img source={Url.IMG_ABORT} />
+            {/* <TouchableOpacity>
+                <Img source={Url.ABORT} />
+            </TouchableOpacity> */}
+            <BlurMask />
+            <TouchableOpacity style={styles.touchableAbort}
+                onPress={_ => { console.log('haha') }}>
+                <AbortX source={ImgUrl.ABORT_X} />
             </TouchableOpacity>
+            <SFlashOnOff />
         </Container>
     )
 }
 
-const Container = styled(View)`
-            flex: 1;
-            background-color: black;
+const styles = StyleSheet.create({
+    touchableAbort: {
+        top: 20,
+        left: 20,
+        position: 'absolute'
+    }
+})
+
+const BlurMask = styled(View)`
+    flex: 1;
+    background-color: black;
+    opacity: 0.5;
 `
 
-const Img = styled(Image)`
-    width: 40;
-    height: 40;
-    margin-left: 20;
-    margin-top: 20;
+const SFlashOnOff = styled(FlashOnOff)`
+    position: absolute;
+    top: 20;
+    right: 20;
+`
+
+const AbortX = styled(Image)`
+    width: 42;
+    height: 42
+`
+const Container = styled(View)`
+    background-color: green;
+    flex: 1;
+    flex-direction: row
 `
