@@ -5,7 +5,7 @@ import { Stack } from './navigation';
 
 const MainStack = createStackNavigator({
     [Stack.ScanCamera]: { screen: ScanCamera },
-    [Stack.Scan]: { screen: Scan }
+    [Stack.Scan]: { screen: Scan },
 }, { headerMode: 'none' })
 
 const AppNavigation = MainStack
