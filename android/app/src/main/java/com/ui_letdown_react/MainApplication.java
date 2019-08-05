@@ -12,6 +12,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.ui_letdown_react.BarCodeCamera.BarCodeCameraPackage;
 import com.ui_letdown_react.OpenSettting.OpenSettingPackage;
+import com.ui_letdown_react.Playground.PlaygroundViewPackage;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here, for example:
        packages.add(new OpenSettingPackage());
        packages.add(new BarCodeCameraPackage());
+       packages.add(new PlaygroundViewPackage());
       return packages;
     }
 

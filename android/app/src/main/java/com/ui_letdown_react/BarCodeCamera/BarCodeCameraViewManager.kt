@@ -13,10 +13,5 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>() {
         return _barcodeView
     }
 
-    override fun onDropViewInstance(view: BarCodeCameraView) {
-        _barcodeView.stop()
-        super.onDropViewInstance(view)
-    }
-
     override fun getName(): String = "BarCodeCameraView"
 }

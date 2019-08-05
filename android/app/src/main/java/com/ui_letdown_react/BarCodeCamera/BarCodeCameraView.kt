@@ -16,7 +16,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import java.util.*
 import kotlin.Comparator
 
-class BarCodeCameraView(private val _context: Context) : TextureView(_context), TextureView.SurfaceTextureListener, LifecycleEventListener {
+class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), TextureView.SurfaceTextureListener, LifecycleEventListener {
 
     // Max preview width that is guaranteed by Camera2 API
     private val MAX_PREVIEW_WIDTH = 1920
@@ -30,7 +30,7 @@ class BarCodeCameraView(private val _context: Context) : TextureView(_context), 
     private lateinit var _requestBuilder: CaptureRequest.Builder
 
     init {
-        (_context as ThemedReactContext).addLifecycleEventListener(this)
+        _context.addLifecycleEventListener(this)
     }
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {}
@@ -58,6 +58,7 @@ class BarCodeCameraView(private val _context: Context) : TextureView(_context), 
 
     override fun onHostDestroy() {
         stop()
+        _context.removeLifecycleEventListener(this)
     }
 
     @SuppressLint("NewApi")
@@ -81,7 +82,7 @@ class BarCodeCameraView(private val _context: Context) : TextureView(_context), 
             surfaceTexture.setDefaultBufferSize(bestSize.width, bestSize.height)
 
             try {
-                _manager.openCamera(camId, _stateCallback, null)
+//                _manager.openCamera(camId, _stateCallback, null)
             } catch (er: CameraAccessException) {
                 throw er
             }
