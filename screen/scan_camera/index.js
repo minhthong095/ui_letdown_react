@@ -41,7 +41,7 @@ export const ScanCamera = _ => {
             </TouchableOpacity>
             <SFlashOnOff /> */}
             {/* {onOffCam && <BarCodeCameraView style={StyleSheet.absoluteFill} />} */}
-            {onOffCam && <PlaygroundView onClick={ass => {
+            {onOffCam && <PlaygroundView onXXXClick={(ass) => {
                 console.log('ASS: ' + ass)
             }} style={StyleSheet.absoluteFill} />}
             <TouchableOpacity onPress={_ => { setOnOffCam(!onOffCam) }} style={{ position: 'absolute', left: 0, bottom: 0, right: 0 }}>

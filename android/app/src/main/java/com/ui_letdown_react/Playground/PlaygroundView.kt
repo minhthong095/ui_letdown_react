@@ -6,7 +6,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerModule
-import com.ui_letdown_react.Playground.Event.PlaygroundEventHelper
+import com.ui_letdown_react.Playground.Event.ClickButtonEvent
+import com.ui_letdown_react.dispatchEvent
 
 class PlaygroundView(private val _context: ThemedReactContext) : LinearLayout(_context) {
     init {
@@ -18,12 +19,11 @@ class PlaygroundView(private val _context: ThemedReactContext) : LinearLayout(_c
 
         val btn = Button(_context)
         btn.text = "Button"
-
         addView(txt1)
         addView(btn)
 
         btn.setOnClickListener {
-            PlaygroundEventHelper.submitClickEvent(it)
+            _context.dispatchEvent(ClickButtonEvent(id))
         }
     }
 }
