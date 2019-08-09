@@ -207,6 +207,7 @@ dependencies {
     compile "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
+    implementation "com.google.zxing:core:3.4.0"
 }
 
 // Run this once to be able to run the application with BUCK

@@ -12,6 +12,15 @@ import com.facebook.react.uimanager.ViewManager
 import java.util.*
 
 class BarCodeCameraPackage: ReactPackage {
+
+    companion object {
+        val VALID_ZXING_BARCODE = Collections.unmodifiableMap(
+                hashMapOf<String, String>(
+                        1 to BarCode
+                )
+        )
+    }
+
     override fun createNativeModules(reactContext: ReactApplicationContext): MutableList<NativeModule> =
             Collections.emptyList()
 

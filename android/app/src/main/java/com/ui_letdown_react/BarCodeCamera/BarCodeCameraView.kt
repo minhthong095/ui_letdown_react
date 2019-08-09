@@ -6,7 +6,9 @@ import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.media.Image
 import android.media.ImageReader
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -28,6 +30,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private lateinit var _surfaceTextureSizeAvailable: Size
     private lateinit var _surfaceTextureAvailable: SurfaceTexture
     private var _scanImageReader: ImageReader? = null
+    private var _imageScan: Image? = null
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -39,10 +42,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        if (!_lockBarCodeReadTask) {
-            _lockBarCodeReadTask = true
-            BarCodeAsyncTask(this).execute()
-        }
+
     }
 
     override fun onBarCodeRead(result: String) {
@@ -161,7 +161,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             _requestBuilder.addTarget(previewSurface)
             _requestBuilder.addTarget(_scanImageReader?.surface)
 
-            _requestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_BARCODE)
+//            _requestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_BARCODE)
+//            _requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_STATE_ACTIVE_SCAN)
 
             _camera!!.createCaptureSession(mutableListOf(previewSurface, _scanImageReader?.surface), _sessionCallback, null)
         } catch (er: CameraAccessException) {
@@ -183,8 +184,13 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private val _imageAvailableListener = ImageReader.OnImageAvailableListener {
-        println("LL")
+    private val _imageAvailableListener = ImageReader.OnImageAvailableListener { imgReader ->
+        _imageScan = imgReader.acquireNextImage()
+        val planes = _imageScan?.planes
+        if (planes != null && planes.isNotEmpty() && !_lockBarCodeReadTask) {
+            _lockBarCodeReadTask = true
+            val byteArray = ByteArray(planes[0].buffer.remaining())
+        }
     }
 
     private val _cameraStateCallback = object : CameraDevice.StateCallback() {
