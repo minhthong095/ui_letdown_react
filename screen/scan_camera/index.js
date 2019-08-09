@@ -40,10 +40,10 @@ export const ScanCamera = _ => {
                 <AbortX source={ImgUrl.ABORT_X} />
             </TouchableOpacity>
             <SFlashOnOff /> */}
-            {/* {onOffCam && <BarCodeCameraView style={StyleSheet.absoluteFill} />} */}
-            {onOffCam && <PlaygroundView onXXXClick={(ass) => {
+            {onOffCam && <BarCodeCameraView style={StyleSheet.absoluteFill} />}
+            {/* {onOffCam && <PlaygroundView onXXXClick={(ass) => {
                 console.log('ASS: ' + ass)
-            }} style={StyleSheet.absoluteFill} />}
+            }} style={StyleSheet.absoluteFill} />} */}
             <TouchableOpacity onPress={_ => { setOnOffCam(!onOffCam) }} style={{ position: 'absolute', left: 0, bottom: 0, right: 0 }}>
                 <View style={{ flex: 1, backgroundColor: 'black' }}>
                     <Text style={{ paddingTop: 30, color: 'white' }}>HIT</Text>

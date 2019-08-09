@@ -9,12 +9,11 @@ import com.facebook.react.uimanager.ReactShadowNode
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManager
+import java.util.*
 
 class BarCodeCameraPackage: ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): MutableList<NativeModule> =
-            mutableListOf(
-                    BarCodeCameraModule(reactContext)
-            )
+            Collections.emptyList()
 
     override fun createViewManagers(reactContext: ReactApplicationContext): MutableList<ViewManager<*, *>> =
             mutableListOf(
