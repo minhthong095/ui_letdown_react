@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
+import android.graphics.YuvImage
 import android.hardware.camera2.*
-import android.media.Image
 import android.media.ImageReader
+import android.os.AsyncTask
 import android.util.Log
 import android.util.Size
 import android.view.Surface
@@ -16,8 +18,14 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.uimanager.ThemedReactContext
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.DecodeHintType
+import com.google.zxing.MultiFormatReader
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.*
 import kotlin.Comparator
+import kotlin.collections.HashMap
 
 class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), BarCodeAsyncTaskDelegate, TextureView.SurfaceTextureListener, LifecycleEventListener {
 
@@ -25,12 +33,12 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _session: CameraCaptureSession? = null
     private lateinit var _manager: CameraManager
     private lateinit var _requestBuilder: CaptureRequest.Builder
-    private var _lockBarCodeReadTask: Boolean = false // May use with volatile
-    private var _lockOpenCamera: Boolean = false // May use with volatile
-    private lateinit var _surfaceTextureSizeAvailable: Size
-    private lateinit var _surfaceTextureAvailable: SurfaceTexture
     private var _scanImageReader: ImageReader? = null
-    private var _imageScan: Image? = null
+    private lateinit var _previewSize: Size
+    private var _camId: String = ""
+    private var _lockScan: Boolean = false
+    private var _taskBarCodeRead: AsyncTask<Void, Void, String>? = null
+    private lateinit var _barcodeFormatReader: MultiFormatReader
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -45,34 +53,23 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
     }
 
-    override fun onBarCodeRead(result: String) {
-        _lockBarCodeReadTask = false
-    }
-
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
         stop()
         return true
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-        _surfaceTextureSizeAvailable = Size(width, height)
-        _surfaceTextureAvailable = surface!!
-        openCamera()
+        openCamera(surface!!, width, height)
     }
 
-    private fun setupScanImageReader(bestSize: Size) {
-        _scanImageReader?.close()
-        _scanImageReader = ImageReader.newInstance(bestSize.width, bestSize.height, ImageFormat.YUV_420_888, 1)
-        _scanImageReader?.setOnImageAvailableListener(_imageAvailableListener, null)
+    fun setBarCodeTypes(codes: List<BarcodeFormat>) {
+        val hints = HashMap<DecodeHintType, Any>(codes.size)
+        hints[DecodeHintType.POSSIBLE_FORMATS] = codes
+        _barcodeFormatReader.setHints(hints)
     }
 
     @SuppressLint("NewApi")
-    private fun openCamera() {
-
-        if (_lockOpenCamera)
-            return
-
-        _lockOpenCamera = true
+    private fun openCamera(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
 
         if (ContextCompat.checkSelfPermission(_context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
             return
@@ -86,17 +83,21 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 if (lenType == null || lenType == CameraCharacteristics.LENS_FACING_FRONT)
                     continue
 
+                _camId = camId
                 val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                 val surfaceSizeSupport = map!!.getOutputSizes(SurfaceTexture::class.java)
-                val bestSize = appropriateSize(_surfaceTextureSizeAvailable.width, _surfaceTextureSizeAvailable.height, surfaceSizeSupport)
-                setupScanImageReader(bestSize)
-                _surfaceTextureAvailable.setDefaultBufferSize(bestSize.width, bestSize.height)
-
-                _manager.openCamera(camId, _cameraStateCallback, null)
+                _previewSize = appropriateSize(width, height, surfaceSizeSupport)
+                surfaceTexture.setDefaultBufferSize(_previewSize.width, _previewSize.height)
+                _manager.openCamera(_camId, _cameraStateCallback, null)
             } catch (er: CameraAccessException) {
                 throw er
             }
         }
+    }
+
+    private fun setupScanImageReader() {
+        _scanImageReader = ImageReader.newInstance(_previewSize.width, _previewSize.height, ImageFormat.YUV_420_888, 1)
+        _scanImageReader?.setOnImageAvailableListener(_imageReaderListener, null)
     }
 
     // For more information about this function go to https://github.com/googlesamples/android-Camera2Basic
@@ -123,11 +124,12 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         return choices[0]
     }
 
+    @SuppressLint("MissingPermission")
     override fun onHostResume() {
-        if (surfaceTextureListener != null)
-            openCamera()
-        else
-            surfaceTextureListener = this
+//        if (surfaceTextureListener != null)
+//            _manager.openCamera(_camId, _cameraStateCallback, null)
+//        else
+//            surfaceTextureListener = this
     }
 
     override fun onHostPause() {
@@ -143,7 +145,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         _session = null
         _camera?.close()
         _camera = null
-        _lockOpenCamera = false
+        _taskBarCodeRead?.cancel(true)
     }
 
     fun stopClearly() {
@@ -156,15 +158,15 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         if (_camera == null) return
 
         try {
+            setupScanImageReader()
             val previewSurface = Surface(surfaceTexture)
+            val scanSurface = _scanImageReader?.surface
             _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             _requestBuilder.addTarget(previewSurface)
-            _requestBuilder.addTarget(_scanImageReader?.surface)
+            if (scanSurface != null)
+                _requestBuilder.addTarget(scanSurface)
 
-//            _requestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_BARCODE)
-//            _requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_STATE_ACTIVE_SCAN)
-
-            _camera!!.createCaptureSession(mutableListOf(previewSurface, _scanImageReader?.surface), _sessionCallback, null)
+            _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
         } catch (er: CameraAccessException) {
             throw er
         }
@@ -184,13 +186,25 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private val _imageAvailableListener = ImageReader.OnImageAvailableListener { imgReader ->
-        _imageScan = imgReader.acquireNextImage()
-        val planes = _imageScan?.planes
-        if (planes != null && planes.isNotEmpty() && !_lockBarCodeReadTask) {
-            _lockBarCodeReadTask = true
-            val byteArray = ByteArray(planes[0].buffer.remaining())
+    private val _imageReaderListener = ImageReader.OnImageAvailableListener { imageReader ->
+        if (!_lockScan) {
+            val imageScan = imageReader.acquireNextImage()
+            val byteArray = ByteArray(imageScan.planes[0].buffer.remaining())
+
+
+            _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, imageScan.width, imageScan.height).execute()
+            imageScan.close()
+        } else {
+            imageReader.acquireNextImage().close()
         }
+    }
+
+    override fun onBarCodeRead(result: String) {
+        _lockScan = false
+    }
+
+    override fun onPreBarCodeRead() {
+        _lockScan = true
     }
 
     private val _cameraStateCallback = object : CameraDevice.StateCallback() {

@@ -1,8 +1,12 @@
 import styled from 'styled-components'
-import { View, Text, TouchableOpacity, Modal } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react';
-import { PermissionsAndroid, NativeModules, AppState } from 'react-native';
+import { PermissionsAndroid, NativeModules, AppState, requireNativeComponent } from 'react-native';
 import { Navigation, Stack } from '../../navigation/navigation';
+import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
+// import CheckBox from '../../component/checkbox/checkbox';
+const AndroidCheckBox = requireNativeComponent('AndroidCheckBox')
+
 const { OpenSetting } = NativeModules
 
 export const Scan = () => {
@@ -63,7 +67,7 @@ export const Scan = () => {
             })
     }
 
-    function openCamera() {
+    function _openCamera() {
         if (isEnableScanBtn.current == true)
             Navigation.navigate(Stack.ScanCamera)
     }
@@ -76,7 +80,10 @@ export const Scan = () => {
 
     return (
         <Container>
-            <ContainerVisualCamera>
+            <BarCodeCamera
+                barcodeTypes={[]}
+                style={StyleSheet.absoluteFill} />
+            {/* <ContainerVisualCamera>
                 {isAskPermission &&
                     <PermissionView>
                         <AskPermissionText>YOU NEED TO APPROVE CAMERA PERMISSION.</AskPermissionText>
@@ -88,11 +95,11 @@ export const Scan = () => {
                     </PermissionView>
                 }
             </ContainerVisualCamera>
-            <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={openCamera}>
+            <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={_openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>
                 </ScanButton>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </Container>
     )
 }

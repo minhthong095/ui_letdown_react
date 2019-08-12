@@ -3,8 +3,7 @@ import styled from 'styled-components'
 import { View, Image, TouchableOpacity, StyleSheet, NativeModules, Text, requireNativeComponent, Alert } from 'react-native'
 import { ImgUrl } from '../../global/img_url';
 import { FlashOnOff } from '../../component/flash_on_off';
-const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
-const PlaygroundView = requireNativeComponent('PlaygroundView')
+import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
 
 export const ScanCamera = _ => {
 
@@ -12,25 +11,6 @@ export const ScanCamera = _ => {
 
     return (
         <Container>
-            {/* <RNCamera
-                onCameraReady={_ => { console.log('B: ' + Math.floor(Date.now())) }}
-                orientation={'portrait'}
-                style={{ flex: 1 }}
-                captureAudio={false}
-                autoFocus={RNCamera.Constants.AutoFocus.off}
-            />
-            <View
-                pointerEvents={'none'}
-                style={{
-                    borderWidth: 1,
-                    borderColor: 'yellow',
-                    position: 'absolute',
-                    left: 100,
-                    top: 100,
-                    width: 20,
-                    height: 20
-                }}
-            /> */}
             {/* <TouchableOpacity>
                 <Img source={Url.ABORT} />
             </TouchableOpacity> */}
@@ -40,7 +20,11 @@ export const ScanCamera = _ => {
                 <AbortX source={ImgUrl.ABORT_X} />
             </TouchableOpacity>
             <SFlashOnOff /> */}
-            {onOffCam && <BarCodeCameraView style={StyleSheet.absoluteFill} />}
+            {onOffCam &&
+                <BarCodeCamera
+                    style={StyleSheet.absoluteFill}
+                // barCodeTypes={[BarCodeType.CODE_128, BarCodeType.QR]}
+                />}
             {/* {onOffCam && <PlaygroundView onXXXClick={(ass) => {
                 console.log('ASS: ' + ass)
             }} style={StyleSheet.absoluteFill} />} */}
