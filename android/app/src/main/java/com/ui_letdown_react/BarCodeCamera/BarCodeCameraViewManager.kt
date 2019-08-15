@@ -1,5 +1,9 @@
 package com.ui_letdown_react.BarCodeCamera
 
+import android.annotation.SuppressLint
+import android.util.Log
+import android.view.ViewGroup
+import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
@@ -7,20 +11,30 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.google.zxing.BarcodeFormat
 
-class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>() {
+class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), LifecycleEventListener {
 
     enum class Event(val value: String) {
         ON_BARCODE_READ("onBarCodeRead")
     }
 
+    private lateinit var _view: BarCodeCameraView
+    private lateinit var _context: ThemedReactContext
+    private var _isPause = false
+
     override fun getName(): String = "BarCodeCameraView"
 
     override fun createViewInstance(reactContext: ThemedReactContext): BarCodeCameraView {
-        return BarCodeCameraView(reactContext)
+        _context = reactContext
+        _context.addLifecycleEventListener(this)
+        _view = BarCodeCameraView(reactContext)
+        return _view
     }
 
     override fun onDropViewInstance(view: BarCodeCameraView) {
-        view.stopClearly()
+        Log.e("@@", "DropViewInstance")
+        _view.stop()
+        _context.removeLifecycleEventListener(this)
+
         super.onDropViewInstance(view)
     }
 
@@ -44,5 +58,23 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>() {
         } else {
             view.setBarCodeTypes(BarCodeCameraPackage.VALID_SUPPORT_BARCODE.values.toList())
         }
+    }
+
+    override fun onHostResume() {
+        Log.e("@@", "onHostResume")
+        if (_isPause) {
+            _isPause = false
+            _view.openCameraAgain()
+        }
+    }
+
+    override fun onHostPause() {
+        Log.e("@@", "onHostPause")
+        _isPause = true
+        _view.stop()
+    }
+
+    override fun onHostDestroy() {
+        // Not call
     }
 }

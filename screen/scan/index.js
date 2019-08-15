@@ -12,7 +12,7 @@ const { OpenSetting } = NativeModules
 export const Scan = () => {
 
     const [isAskPermission, setAskPermission] = useState(false);
-    const isEnableScanBtn = useRef(false)
+    const [isEnableScanBtn, setEnableScanBtn] = useState(false)
     const isAlreadyInit = useRef(null)
 
     useEffect(_ => {
@@ -35,7 +35,7 @@ export const Scan = () => {
                 }
                 else {
                     setAskPermission(false)
-                    isEnableScanBtn.current = true
+                    setEnableScanBtn(true)
                 }
             })
     }
@@ -47,8 +47,9 @@ export const Scan = () => {
                 if (result != PermissionsAndroid.RESULTS.GRANTED)
                     setAskPermission(true)
 
-                if (result == PermissionsAndroid.RESULTS.GRANTED)
-                    isEnableScanBtn.current = true
+                if (result == PermissionsAndroid.RESULTS.GRANTED) {
+                    setEnableScanBtn(true)
+                }
             })
     }
 
@@ -62,28 +63,23 @@ export const Scan = () => {
                     OpenSetting.openAppSetting()
                 else {
                     setAskPermission(false)
-                    isEnableScanBtn.current = true
+                    setEnableScanBtn(true)
                 }
             })
     }
 
     function _openCamera() {
-        if (isEnableScanBtn.current == true)
+        if (isEnableScanBtn)
             Navigation.navigate(Stack.ScanCamera)
     }
 
-    console.log('Render Bae');
-
     function getActiveScanBtn() {
-        return isEnableScanBtn.current == true ? 0.2 : 1
+        return isEnableScanBtn == true ? 0.2 : 1
     }
 
     return (
         <Container>
-            <BarCodeCamera
-                barcodeTypes={[]}
-                style={StyleSheet.absoluteFill} />
-            {/* <ContainerVisualCamera>
+            <ContainerVisualCamera>
                 {isAskPermission &&
                     <PermissionView>
                         <AskPermissionText>YOU NEED TO APPROVE CAMERA PERMISSION.</AskPermissionText>
@@ -95,11 +91,12 @@ export const Scan = () => {
                     </PermissionView>
                 }
             </ContainerVisualCamera>
+            <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: 'black' }} />
             <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={_openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>
                 </ScanButton>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
         </Container>
     )
 }

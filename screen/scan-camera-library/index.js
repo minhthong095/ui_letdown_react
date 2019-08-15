@@ -4,8 +4,9 @@ import { View, Image, TouchableOpacity, StyleSheet, NativeModules, Text, require
 import { ImgUrl } from '../../global/img_url';
 import { FlashOnOff } from '../../component/flash_on_off';
 import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
+import { RNCamera } from 'react-native-camera'
 
-export const ScanCamera = _ => {
+export const ScanCameraLibrary = _ => {
 
     const [onOffCam, setOnOffCam] = useState(true)
     const [barcodeSupport, setBarcodeSupport] = useState([BarCodeCameraType.CODE_128])
@@ -21,17 +22,20 @@ export const ScanCamera = _ => {
                 <AbortX source={ImgUrl.ABORT_X} />
             </TouchableOpacity>
             <SFlashOnOff /> */}
+            {/* {onOffCam &&
+                <RNCamera
+                    style={StyleSheet.absoluteFill}
+                    captureAudio={false}
+                    useCamera2Api={true}
+                />
+            } */}
             {onOffCam &&
                 <BarCodeCamera
                     style={StyleSheet.absoluteFill}
-                    barcodeTypes={barcodeSupport}
-                />}
-            {/* {onOffCam && <PlaygroundView onXXXClick={(ass) => {
-                console.log('ASS: ' + ass)
-            }} style={StyleSheet.absoluteFill} />} */}
+                />
+            }
             <TouchableOpacity onPress={_ => {
                 console.log("WHY")
-                setBarcodeSupport([])
             }} style={{ position: 'absolute', left: 0, bottom: 0, right: 0 }}>
                 <View style={{ flex: 1, backgroundColor: 'black' }}>
                     <Text style={{ paddingTop: 30, color: 'white' }}>HIT</Text>

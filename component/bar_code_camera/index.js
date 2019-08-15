@@ -33,9 +33,9 @@ export const BarCodeCameraType = {
 }
 
 BarCodeCamera.defaultProp = {
-    barCodeTypes: []
+    barcodeTypes: []
 }
 
 BarCodeCamera.propTypes = {
-    barCodeTypes: PropTypes.arrayOf(PropTypes.string)
+    barcodeTypes: PropTypes.arrayOf(PropTypes.string)
 }
