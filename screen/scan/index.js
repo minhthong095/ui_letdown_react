@@ -91,7 +91,7 @@ export const Scan = () => {
                     </PermissionView>
                 }
             </ContainerVisualCamera>
-            <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: 'black' }} />
+            <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: 'green' }} />
             <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={_openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>

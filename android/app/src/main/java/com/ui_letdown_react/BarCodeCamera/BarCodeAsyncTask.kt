@@ -12,6 +12,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class BarCodeAsyncTask(
+        private val _file: File,
         private val _delegate: BarCodeAsyncTaskDelegate,
         private val _byteData: ByteArray,
         private val _height: Int,
@@ -29,61 +30,66 @@ class BarCodeAsyncTask(
 
     override fun doInBackground(vararg params: Void?): String? {
 
-        var result: Result? = null
+        val fileOutputStream = FileOutputStream(_file)
+        fileOutputStream.write(_byteData)
+        fileOutputStream.close()
 
-        try {
-            val bitmap = generateBitmapFromImageData(
-                    _byteData,
-                    _width,
-                    _height,
-                    false
-            )
-            result = _barcodeReader.decodeWithState(bitmap)
-        } catch (e: NotFoundException) {
-            val bitmap = generateBitmapFromImageData(
-                    rotateImage(_byteData, _width, _height),
-                    _height,
-                    _width,
-                    false
-            )
-            try {
-                result = _barcodeReader.decodeWithState(bitmap)
-            } catch (e1: NotFoundException) {
-                val invertedBitmap = generateBitmapFromImageData(
-                        _byteData,
-                        _width,
-                        _height,
-                        true
-                )
-                try {
-                    result = _barcodeReader.decodeWithState(invertedBitmap)
-                } catch (e2: NotFoundException) {
-                    val invertedRotatedBitmap = generateBitmapFromImageData(
-                            rotateImage(_byteData, _width, _height),
-                            _height,
-                            _width,
-                            true
-                    )
-                    try {
-                        result = _barcodeReader.decodeWithState(invertedRotatedBitmap)
-                    } catch (e3: NotFoundException) {
-                        //no barcode Found
-                    }
-                }
-            }
-
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-
-        if (result == null) {
-            // Log.e("@@", "NULL")
-            return null
-        }
-
-        // Log.e("@@", result.text)
-
-        return result.text
+//        var result: Result? = null
+//
+//        try {
+//            val bitmap = generateBitmapFromImageData(
+//                    _byteData,
+//                    _width,
+//                    _height,
+//                    false
+//            )
+//            result = _barcodeReader.decodeWithState(bitmap)
+//        } catch (e: NotFoundException) {
+//            val bitmap = generateBitmapFromImageData(
+//                    rotateImage(_byteData, _width, _height),
+//                    _height,
+//                    _width,
+//                    false
+//            )
+//            try {
+//                result = _barcodeReader.decodeWithState(bitmap)
+//            } catch (e1: NotFoundException) {
+//                val invertedBitmap = generateBitmapFromImageData(
+//                        _byteData,
+//                        _width,
+//                        _height,
+//                        true
+//                )
+//                try {
+//                    result = _barcodeReader.decodeWithState(invertedBitmap)
+//                } catch (e2: NotFoundException) {
+//                    val invertedRotatedBitmap = generateBitmapFromImageData(
+//                            rotateImage(_byteData, _width, _height),
+//                            _height,
+//                            _width,
+//                            true
+//                    )
+//                    try {
+//                        result = _barcodeReader.decodeWithState(invertedRotatedBitmap)
+//                    } catch (e3: NotFoundException) {
+//                        //no barcode Found
+//                    }
+//                }
+//            }
+//
+//        } catch (t: Throwable) {
+//            t.printStackTrace()
+//        }
+//
+//        if (result == null) {
+//            // Log.e("@@", "NULL")
+//            return null
+//        }
+//
+//        // Log.e("@@", result.text)
+//
+//        return result.text
+        return ""
     }
 
     override fun onPostExecute(result: String?) {

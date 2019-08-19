@@ -22,16 +22,10 @@ export const ScanCameraLibrary = _ => {
                 <AbortX source={ImgUrl.ABORT_X} />
             </TouchableOpacity>
             <SFlashOnOff /> */}
-            {/* {onOffCam &&
+            {onOffCam &&
                 <RNCamera
                     style={StyleSheet.absoluteFill}
                     captureAudio={false}
-                    useCamera2Api={true}
-                />
-            } */}
-            {onOffCam &&
-                <BarCodeCamera
-                    style={StyleSheet.absoluteFill}
                 />
             }
             <TouchableOpacity onPress={_ => {
