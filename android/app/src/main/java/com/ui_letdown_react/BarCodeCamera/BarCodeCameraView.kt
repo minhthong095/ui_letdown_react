@@ -88,7 +88,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 configurePreviewSize()
                 configureTransform(width, height)
 
-                _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
+                _surfaceTexture.setDefaultBufferSize(_previewSize.width, _previewSize.height)
 
                 _manager.openCamera(_camId, _cameraStateCallback, null)
             } catch (er: CameraAccessException) {
@@ -109,7 +109,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         val preview = RectF(0f, 0f, _previewSize.height.toFloat(), _previewSize.width.toFloat())
 
         // texture > preview
-        if (texture.width() > preview.width() && texture.height() > preview.height()) {
+        if (texture.width() >= preview.width() && texture.height() >= preview.height()) {
 
             val matrix = Matrix()
             preview.offset(texture.centerX() - preview.centerX(), texture.centerY() - preview.centerY()) // Center
@@ -135,7 +135,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             _requestBuilder.addTarget(previewSurface)
 
-            _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
+            _camera!!.createCaptureSession(mutableListOf(previewSurface), _sessionCallback, null)
         } catch (er: CameraAccessException) {
             throw er
         }
