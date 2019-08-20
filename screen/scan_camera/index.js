@@ -8,7 +8,7 @@ import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camer
 export const ScanCamera = _ => {
 
     const [onOffCam, setOnOffCam] = useState(true)
-    const [barcodeSupport, setBarcodeSupport] = useState([BarCodeCameraType.CODE_128])
+    const [barcodeSupport, setBarcodeSupport] = useState([])
 
     return (
         <Container>

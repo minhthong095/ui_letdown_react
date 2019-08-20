@@ -24,6 +24,7 @@ export const ScanCameraLibrary = _ => {
             <SFlashOnOff /> */}
             {onOffCam &&
                 <RNCamera
+                    onBarCodeRead={barc => { }}
                     style={StyleSheet.absoluteFill}
                     captureAudio={false}
                 />

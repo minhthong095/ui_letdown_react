@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.hardware.camera2.*
+import android.media.Image
 import android.media.ImageReader
 import android.os.AsyncTask
 import android.util.Log
@@ -61,7 +62,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     fun setBarCodeTypes(codes: List<BarcodeFormat>) {
-        val hints = HashMap<DecodeHintType, Any>(codes.size)
+        val hints = HashMap<DecodeHintType, Any>(DecodeHintType.values().size)
         hints[DecodeHintType.POSSIBLE_FORMATS] = codes
         _barcodeFormatReader.setHints(hints)
     }
@@ -88,7 +89,9 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 configurePreviewSize()
                 configureTransform(width, height)
 
-                _surfaceTexture.setDefaultBufferSize(_previewSize.width, _previewSize.height)
+                // Preview size follow through screen
+                // But SDK function is not follow with device sceen
+                _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
 
                 _manager.openCamera(_camId, _cameraStateCallback, null)
             } catch (er: CameraAccessException) {
@@ -106,7 +109,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     // Must places after _previewSize has been configured
     private fun configureTransform(textureWidth: Int, textureHeight: Int) {
         val texture = RectF(0f, 0f, textureWidth.toFloat(), textureHeight.toFloat())
-        val preview = RectF(0f, 0f, _previewSize.height.toFloat(), _previewSize.width.toFloat())
+        val preview = RectF(0f, 0f, _previewSize.width.toFloat(), _previewSize.height.toFloat())
 
         // texture > preview
         if (texture.width() >= preview.width() && texture.height() >= preview.height()) {
@@ -134,15 +137,16 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             val scanSurface = _scanImageReader?.surface
             _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             _requestBuilder.addTarget(previewSurface)
+            _requestBuilder.addTarget(scanSurface!!)
 
-            _camera!!.createCaptureSession(mutableListOf(previewSurface), _sessionCallback, null)
+            _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
         } catch (er: CameraAccessException) {
             throw er
         }
     }
 
     private fun setupScanImageReader() {
-        _scanImageReader = ImageReader.newInstance(_previewSize.width, _previewSize.height, ImageFormat.JPEG, 1)
+        _scanImageReader = ImageReader.newInstance(_previewSize.width, _previewSize.height, ImageFormat.YUV_420_888, 1)
         _scanImageReader?.setOnImageAvailableListener(_imageReaderListener, null)
     }
 
@@ -158,10 +162,10 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             if (choice.width <= 1920 && choice.height <= 1080) {
                 // Choices in configuration map is known for width size larger than height size
                 // And in this app we're only check with vertical so must be width < height
-                if (choice.height >= textureWidth && choice.width >= textureHeight)
-                    bigger.add(choice)
+                if (choice.width >= textureHeight && choice.height >= textureWidth)
+                    bigger.add(Size(choice.height, choice.width))
                 else
-                    smaller.add(choice)
+                    smaller.add(Size(choice.height, choice.width))
             }
         }
         when {
@@ -200,15 +204,31 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
+    private fun imageToI420(image: Image): ByteArray {
+        val yBuffer = image.planes[0].buffer
+        val uBuffer = image.planes[1].buffer
+        val vBuffer = image.planes[2].buffer
+
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
+
+        val i420 = ByteArray(ySize + uSize + vSize)
+
+        yBuffer.get(i420, 0, ySize)
+        uBuffer.get(i420, ySize, uSize)
+        vBuffer.get(i420, ySize + uSize, vSize)
+
+        return i420
+    }
+
     private val _imageReaderListener = ImageReader.OnImageAvailableListener { imageReader ->
         if (!_lockScan) {
             val imageScan = imageReader.acquireNextImage()
-            val byteArray = ByteArray(imageScan.planes[0].buffer.remaining())
+            val byteArray = imageToI420(imageScan)
 
-            val file = File(_context.externalCacheDir, "file.jpeg")
-            file.createNewFile()
-
-            _taskBarCodeRead = BarCodeAsyncTask(file, this, byteArray, imageScan.width, imageScan.height, _barcodeFormatReader).execute()
+            // Description like setDefaultBufferSize
+            _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, imageScan.height, imageScan.width, _barcodeFormatReader).execute()
             imageScan.close()
         } else {
             imageReader.acquireNextImage().close()
@@ -216,14 +236,14 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onPreBarCodeRead() {
-        Log.e("@@", "===")
-        Log.e("@@", "Scan Lock")
+//        Log.e("@@", "===")
+//        Log.e("@@", "Scan Lock")
         _lockScan = true
     }
 
     override fun onBarCodeRead(result: String?) {
-        Log.e("@@", "Scan UnLock")
-//        _lockScan = false
+//        Log.e("@@", "Scan UnLock")
+        _lockScan = false
     }
 
     private val _cameraStateCallback = object : CameraDevice.StateCallback() {

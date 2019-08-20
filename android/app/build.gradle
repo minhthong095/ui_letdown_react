@@ -100,6 +100,11 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = true
 
 /**
+ * Run ZipAlign
+ */
+def enableZipAlignInReleaseBuilds = true
+
+/**
  * The preferred build flavor of JavaScriptCore.
  *
  * For example, to use the international variant, you can use:
@@ -164,6 +169,7 @@ android {
 
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources enableProguardInReleaseBuilds
+            zipAlignEnabled enableZipAlignInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
