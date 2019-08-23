@@ -19,6 +19,6 @@ export const FlashOnOff = props => {
 }
 
 const Img = styled(Image)`
-    width: 32;
-    height: 32;
+    width: 30;
+    height: 30;
 `
