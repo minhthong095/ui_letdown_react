@@ -10,24 +10,32 @@ export const CropRegion = props => {
 
     const onContainerLayout = event => {
         const { width, height } = event.nativeEvent.layout;
-        setContainerDimension({ widthContainer: width, heightContainer: height })
+        const { widthCrop, heightCrop, yCrop } = props
+
+        if (widthCrop > width)
+            throw Error("`widthCrop` not suppose to larger than width screen.")
+        else if (heightCrop + yCrop > height)
+            throw Error("Length of `widthCrop` and `yCrop` is not suppose to larger than height screen.")
+        else
+            setContainerDimension({ widthContainer: width, heightContainer: height })
     }
 
     return (
         <Container onLayout={onContainerLayout}>
-            {containerDimension.widthContainer === undefined ? null :
-                <Container>
-                    <Top {...props} />
-                    <CropLeft {...props} {...containerDimension} />
-                    <CropBorder {...props} {...containerDimension}>
-                        <CornerProtect />
-                        <CropProtectTopRight type={'topRight'} />
-                        <CropProtectBottomLeft type={'bottomLeft'} />
-                        <CropProtectBottomRight type={'bottomRight'} />
-                    </CropBorder>
-                    <CropRight {...props} {...containerDimension} />
-                    <Bottom {...props} {...containerDimension} />
-                </Container>
+            {
+                containerDimension.widthContainer === undefined ? null :
+                    <Container>
+                        <Top {...props} />
+                        <CropLeft {...props} {...containerDimension} />
+                        <CropBorder {...props} {...containerDimension}>
+                            <CornerProtect />
+                            <CropProtectTopRight type={'topRight'} />
+                            <CropProtectBottomLeft type={'bottomLeft'} />
+                            <CropProtectBottomRight type={'bottomRight'} />
+                        </CropBorder>
+                        <CropRight {...props} {...containerDimension} />
+                        <Bottom {...props} {...containerDimension} />
+                    </Container>
             }
         </Container>
     )
@@ -58,7 +66,6 @@ const CropProtectBottomRight = styled(CornerProtect)`
   bottom: 0;
   right: 0
 `
-
 
 const CropBorder = styled(View)`
     position: absolute;
