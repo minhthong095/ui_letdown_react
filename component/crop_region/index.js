@@ -15,16 +15,20 @@ export const CropRegion = props => {
 
     return (
         <Container onLayout={onContainerLayout}>
-            {/* {containerDimension.widthContainer === undefined ? null :
+            {containerDimension.widthContainer === undefined ? null :
                 <Container>
                     <Top {...props} />
                     <CropLeft {...props} {...containerDimension} />
-                    <CropBorder {...props} {...containerDimension} />
+                    <CropBorder {...props} {...containerDimension}>
+                        <CornerProtect />
+                        <CropProtectTopRight type={'topRight'} />
+                        <CropProtectBottomLeft type={'bottomLeft'} />
+                        <CropProtectBottomRight type={'bottomRight'} />
+                    </CropBorder>
                     <CropRight {...props} {...containerDimension} />
                     <Bottom {...props} {...containerDimension} />
                 </Container>
-            } */}
-            <CornerProtect />
+            }
         </Container>
     )
 }
@@ -36,6 +40,25 @@ const Container = styled(View)`
     right: 0;
     bottom: 0;
 `
+
+const CropProtectTopRight = styled(CornerProtect)`
+  position: absolute;
+  top: 0;
+  right: 0
+`
+
+const CropProtectBottomLeft = styled(CornerProtect)`
+  position: absolute;
+  bottom: 0;
+  left: 0
+`
+
+const CropProtectBottomRight = styled(CornerProtect)`
+  position: absolute;
+  bottom: 0;
+  right: 0
+`
+
 
 const CropBorder = styled(View)`
     position: absolute;

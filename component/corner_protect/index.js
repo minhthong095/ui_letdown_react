@@ -4,11 +4,24 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
 export const CornerProtect = props => {
+    const { type, width, height, colorStyle, cornerWidth, style } = props
+
+    rotate = '0deg'
+
+    if (type === 'topRight')
+        rotate = '90deg'
+    else if (type === 'bottomRight')
+        rotate = '180deg'
+    else if (type === 'bottomLeft')
+        rotate = '270deg'
+
     return (
-        <Container {...props}>
-            <UpDraw {...props} />
-            <DownDraw {...props} />
-        </Container>
+        <View style={style}>
+            <Container style={{ transform: [{ rotate: rotate }] }} width={width} height={height}>
+                <UpDraw width={width} cornerWidth={cornerWidth} colorStyle={colorStyle} />
+                <DownDraw height={height} cornerWidth={cornerWidth} colorStyle={colorStyle} />
+            </Container>
+        </View>
     )
 }
 
@@ -35,7 +48,7 @@ CornerProtect.defaultProps = {
     type: 'topLeft',
     width: 11,
     height: 11,
-    colorStyle: 'black',
+    colorStyle: 'white',
     cornerWidth: 2
 }
 
