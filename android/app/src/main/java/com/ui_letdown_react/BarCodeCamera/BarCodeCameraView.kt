@@ -125,8 +125,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         _transformCropRect = Rect(
                 _rawCropRect.top,
                 _previewSize.width - _rawCropRect.right - _rawCropRect.left,
-                _rawCropRect.right,
-                _rawCropRect.bottom
+                _rawCropRect.bottom,
+                _rawCropRect.right
         )
 
 //        _transformCropRect = Rect(0,0,640,480)
@@ -282,10 +282,9 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         if (!_lockScan) {
             val imageScan = imageReader.acquireNextImage()
             val byteArray = imageToLuminance(imageScan)
-//            val byteArray = imageToI420(imageScan)
 
             // Description like setDefaultBufferSize
-            _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, imageScan.height, imageScan.width, _barcodeFormatReader).execute()
+            _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, _transformCropRect.bottom, _transformCropRect.right, _barcodeFormatReader).execute()
             imageScan.close()
         } else {
             imageReader.acquireNextImage().close()
