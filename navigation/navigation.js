@@ -1,4 +1,4 @@
-import { NavigationActions } from 'react-navigation'
+import { StackActions } from 'react-navigation'
 
 const Stack = {
     Scan: 'Scan',
@@ -11,16 +11,20 @@ function setTopLevelNavigator(node) {
     navigation = node;
 }
 
-function navigate(routeName, params = {}) {
-    navigation.dispatch(NavigationActions.navigate({ routeName: routeName, params: params }));
+function stackNavigate(routeName, params = {}) {
+    navigation.dispatch(StackActions.push({ routeName: routeName, params: params }));
 }
 
-function goBack() {
-    navigation.dispatch(NavigationActions.back());
+function stackPop() {
+    navigation.dispatch(StackActions.pop({ n: 1 }));
+}
+
+function getState() {
+    return navigation.statstate
 }
 
 const Navigation = {
-    setTopLevelNavigator, navigate, goBack
+    setTopLevelNavigator, stackNavigate, stackPop, getState
 }
 
 export { Navigation, Stack }

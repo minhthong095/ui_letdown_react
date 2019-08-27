@@ -81,16 +81,12 @@ class BarCodeAsyncTask(
             t.printStackTrace()
         }
 
-        if (result == null) {
-//             Log.e("@@", "NULL")
+        if (result == null)
             return null
-        }
 
-         Log.e("@@", result.text)
+         Log.e("@@", "BARCODE READ: " + result.text)
 
         return result.text
-
-        return ""
     }
 
     override fun onPostExecute(result: String?) {

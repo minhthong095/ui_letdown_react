@@ -6,37 +6,18 @@ import { CornerProtect } from '../corner_protect'
 
 export const CropRegion = props => {
 
-    const [containerDimension, setContainerDimension] = useState({ widthContainer: undefined, heightContainer: undefined })
-
-    const onContainerLayout = event => {
-        const { width, height } = event.nativeEvent.layout;
-        const { widthCrop, heightCrop, yCrop } = props
-
-        if (widthCrop > width)
-            throw Error("`widthCrop` not suppose to larger than width screen.")
-        else if (heightCrop + yCrop > height)
-            throw Error("Length of `widthCrop` and `yCrop` is not suppose to larger than height screen.")
-        else
-            setContainerDimension({ widthContainer: width, heightContainer: height })
-    }
-
     return (
-        <Container onLayout={onContainerLayout}>
-            {
-                containerDimension.widthContainer === undefined ? null :
-                    <Container>
-                        <Top {...props} />
-                        <CropLeft {...props} {...containerDimension} />
-                        <CropBorder {...props} {...containerDimension}>
-                            <CornerProtect />
-                            <CropProtectTopRight type={'topRight'} />
-                            <CropProtectBottomLeft type={'bottomLeft'} />
-                            <CropProtectBottomRight type={'bottomRight'} />
-                        </CropBorder>
-                        <CropRight {...props} {...containerDimension} />
-                        <Bottom {...props} {...containerDimension} />
-                    </Container>
-            }
+        <Container>
+            <Top {...props} />
+            <CropLeft {...props} />
+            <CropBorder {...props}>
+                <CornerProtect />
+                <CropProtectTopRight type={'topRight'} />
+                <CropProtectBottomLeft type={'bottomLeft'} />
+                <CropProtectBottomRight type={'bottomRight'} />
+            </CropBorder>
+            <CropRight {...props} />
+            <Bottom {...props} />
         </Container>
     )
 }
@@ -70,7 +51,7 @@ const CropProtectBottomRight = styled(CornerProtect)`
 const CropBorder = styled(View)`
     position: absolute;
     top: ${props => props.yCrop}
-    left: ${props => (props.widthContainer - props.widthCrop) / 2}
+    left: ${props => props.xCrop}
     width: ${props => props.widthCrop}
     height: ${props => props.heightCrop}
     border-width: 0.2;
@@ -79,7 +60,7 @@ const CropBorder = styled(View)`
 
 const OpacityBlack = styled(View)`
     background-color: black;
-    opacity: 0.15;
+    opacity: 0.17;
 `
 
 const Top = styled(OpacityBlack)`
@@ -94,7 +75,7 @@ const CropLeft = styled(OpacityBlack)`
     position: absolute;
     top: ${props => props.yCrop}
     left: 0;
-    width: ${props => (props.widthContainer - props.widthCrop) / 2}
+    width: ${props => props.xCrop}
     height: ${props => props.heightCrop}
 `
 
@@ -102,7 +83,7 @@ const CropRight = styled(OpacityBlack)`
     position: absolute;
     top: ${props => props.yCrop}
     right: 0;
-    width: ${props => (props.widthContainer - props.widthCrop) / 2}
+    width: ${props => props.xCrop}
     height: ${props => props.heightCrop}
 `
 
@@ -115,14 +96,10 @@ const Bottom = styled(OpacityBlack)`
 `
 
 CropRegion.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    x: PropTypes.number,
-    y: PropTypes.number
-}
-
-CropRegion.defaultProps = {
-    widthCrop: 200,
-    heightCrop: 180,
-    yCrop: 100
+    widthCrop: PropTypes.number,
+    heightCrop: PropTypes.number,
+    widthContainer: PropTypes.number,
+    heightContainer: PropTypes.number,
+    yCrop: PropTypes.number,
+    xCrop: PropTypes.number
 }

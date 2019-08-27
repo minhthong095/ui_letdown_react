@@ -69,8 +69,10 @@ export const Scan = () => {
     }
 
     function _openCamera() {
-        if (isEnableScanBtn)
-            Navigation.navigate(Stack.ScanCamera)
+        if (isEnableScanBtn) {
+            console.log('State; ' + Navigation.getState())
+            Navigation.stackNavigate(Stack.ScanCamera)
+        }
     }
 
     function getActiveScanBtn() {

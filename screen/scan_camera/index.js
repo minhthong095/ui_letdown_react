@@ -1,71 +1,103 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { View, Image, TouchableOpacity, StyleSheet, NativeModules, Text, requireNativeComponent, Alert } from 'react-native'
+import PropTypes from 'prop-types'
+import { View, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert } from 'react-native'
 import { ImgUrl } from '../../global/img_url';
 import { FlashOnOff } from '../../component/flash_on_off';
-import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
+import { CropRegion } from '../../component/crop_region';
+import { MockCamera } from '../../component/mock_camera';
+import { Navigation } from '../../navigation/navigation';
+import { BarCodeCamera } from '../../component/bar_code_camera';
 
-export const ScanCamera = _ => {
+export const ScanCamera = props => {
 
-    const [onOffCam, setOnOffCam] = useState(true)
-    const [barcodeSupport, setBarcodeSupport] = useState([])
+    const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
+
+    const onContainerLayout = event => {
+        const { width, height } = event.nativeEvent.layout;
+        const { widthCrop, heightCrop, yCrop } = props
+
+        if (widthCrop > width)
+            throw Error("`widthCrop` is inappropriate.")
+        else if (heightCrop + yCrop > height)
+            throw Error("Both `widthCrop` and `yCrop` are inappropriate.")
+        else
+            setDimensionContainer({ widthContainer: width, heightContainer: height })
+    }
+
+    const getCropData = (widthCrop, heightCrop, yCrop, xCrop) => {
+        return (
+            PixelRatio.getPixelSizeForLayoutSize(xCrop) + ","
+            + PixelRatio.getPixelSizeForLayoutSize(yCrop) + ","
+            + PixelRatio.getPixelSizeForLayoutSize(widthCrop) + ","
+            + PixelRatio.getPixelSizeForLayoutSize(heightCrop)
+        )
+    }
+
+    const { widthCrop, heightCrop, yCrop } = props
+    const xCrop = (dimensionContainer.widthContainer - widthCrop) / 2
 
     return (
-        <Container>
-            {/* <TouchableOpacity>
-                <Img source={Url.ABORT} />
-            </TouchableOpacity> */}
-            {/* <BlurMask />
-            <TouchableOpacity style={styles.touchableAbort}
-                onPress={_ => { console.log('haha') }}>
-                <AbortX source={ImgUrl.ABORT_X} />
-            </TouchableOpacity>
-            <SFlashOnOff /> */}
-            {onOffCam &&
-                <BarCodeCamera
-                    style={StyleSheet.absoluteFill}
-                    barcodeTypes={barcodeSupport}
-                />}
-            {/* {onOffCam && <PlaygroundView onXXXClick={(ass) => {
-                console.log('ASS: ' + ass)
-            }} style={StyleSheet.absoluteFill} />} */}
-            <TouchableOpacity onPress={_ => {
-                console.log("WHY")
-                setBarcodeSupport([])
-            }} style={{ position: 'absolute', left: 0, bottom: 0, right: 0 }}>
-                <View style={{ flex: 1, backgroundColor: 'black' }}>
-                    <Text style={{ paddingTop: 30, color: 'white' }}>HIT</Text>
-                </View>
-            </TouchableOpacity>
+        <Container onLayout={onContainerLayout}>
+            {
+                dimensionContainer.widthContainer === undefined ? null :
+                    <Container>
+                        <BarCodeCamera
+                            // onBarCodeRead={result => {
+                            //     console.log('Result: ' + result)
+                            //     Navigation.stackPop()
+                            //     Alert.alert(result)
+                            // }}
+                            cropData={getCropData(widthCrop, heightCrop, yCrop, xCrop)}
+                            style={StyleSheet.absoluteFill} />
+                        <CropRegion
+                            widthContainer={dimensionContainer.widthContainer}
+                            heightContainer={dimensionContainer.heightContainer}
+                            widthCrop={widthCrop}
+                            heightCrop={heightCrop}
+                            xCrop={xCrop}
+                            yCrop={yCrop}
+                        />
+                        <TouchableOpacityAbort onPress={_ => { Navigation.stackPop() }}>
+                            <AbortX source={ImgUrl.ABORT_X} />
+                        </TouchableOpacityAbort>
+                        <Flash />
+                    </Container>
+            }
         </Container>
     )
 }
 
-const styles = StyleSheet.create({
-    touchableAbort: {
-        top: 20,
-        left: 20,
-        position: 'absolute'
-    }
-})
-
-const BlurMask = styled(View)`
-    flex: 1;
-    background-color: black;
-    opacity: 0.5;
+const TouchableOpacityAbort = styled(TouchableOpacity)`
+    top: 20;
+    left: 20;
+    position: absolute;
 `
 
-const SFlashOnOff = styled(FlashOnOff)`
+const Flash = styled(FlashOnOff)`
     position: absolute;
     top: 20;
     right: 20;
 `
 
 const AbortX = styled(Image)`
-    width: 42;
-    height: 42
+    width: 39;
+    height: 39
 `
 const Container = styled(View)`
     flex: 1;
-    flex-direction: row
+    flex-direction: row;
+    background-color: black;
 `
+
+ScanCamera.propTypes = {
+    widthCrop: PropTypes.number,
+    heightCrop: PropTypes.number,
+    yCrop: PropTypes.number
+}
+
+ScanCamera.defaultProps = {
+    widthCrop: 220,
+    heightCrop: 200,
+    yCrop: 100
+}

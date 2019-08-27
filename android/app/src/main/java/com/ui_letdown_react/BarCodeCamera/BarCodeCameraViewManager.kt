@@ -1,6 +1,8 @@
 package com.ui_letdown_react.BarCodeCamera
 
 import android.annotation.SuppressLint
+import android.graphics.Rect
+import android.graphics.RectF
 import android.util.Log
 import android.view.ViewGroup
 import com.facebook.react.bridge.LifecycleEventListener
@@ -9,6 +11,7 @@ import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
+import com.facebook.react.uimanager.annotations.ReactPropGroup
 import com.google.zxing.BarcodeFormat
 
 class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), LifecycleEventListener {
@@ -58,6 +61,13 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
         } else {
             view.setBarCodeTypes(BarCodeCameraPackage.VALID_SUPPORT_BARCODE.values.toList())
         }
+    }
+
+    // JS will handle wrong data format. This method will be considered perfect.
+    @ReactProp(name = "cropData")
+    fun setCropData(view: BarCodeCameraView, cropData: String) {
+        val parts = cropData.split(",").map { it.toInt() }
+        view.setRectCrop(Rect(parts[0], parts[1], parts[2], parts[3]))
     }
 
     override fun onHostResume() {

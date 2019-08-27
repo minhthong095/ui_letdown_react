@@ -15,9 +15,12 @@ import android.view.TextureView
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.UIManagerModule
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
+import com.ui_letdown_react.BarCodeCamera.Event.OnBarCodeReadEvent
+import org.reactnative.camera.events.BarCodeReadEvent
 import java.io.File
 import java.util.*
 import kotlin.Comparator
@@ -36,9 +39,10 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _taskBarCodeRead: AsyncTask<Void, Void, String>? = null
     private val _barcodeFormatReader = MultiFormatReader()
     private lateinit var _surfaceTexture: SurfaceTexture
+    private var _rawCropRect = Rect()
+    private var _transformCropRect = Rect()
 
     init {
-        Log.e("@@", "INIT")
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         surfaceTextureListener = this
     }
@@ -50,14 +54,17 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
-        Log.e("@@", "onSurfaceTextureDestroyed")
         return false
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-        Log.e("@@", "onSurfaceTextureAvailable w:$width,h:$height")
         if (surface != null)
             openCamera(surface, width, height)
+    }
+
+    // Raw crop rect, before converting to follow preview ratio
+    fun setRectCrop(rawRect: Rect) {
+        _rawCropRect = rawRect
     }
 
     fun setBarCodeTypes(codes: List<BarcodeFormat>) {
@@ -85,7 +92,9 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 _camId = camId
                 _surfaceTexture = surfaceTexture
 
-                configurePreviewSize()
+                configurePreviewSize(width, height)
+                configureCropRect(width, height)
+                transformCropRect()
                 configureTransform(width, height)
 
                 _manager.openCamera(_camId, _cameraStateCallback, null)
@@ -95,10 +104,32 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private fun configurePreviewSize() {
+    // Must places after _previewSize has been configured
+    private fun configureCropRect(textureWidth: Int, textureHeight: Int) {
+        val widthScale = textureWidth.toFloat() / _previewSize.width.toFloat()
+        val heightScale = textureHeight.toFloat() / _previewSize.height.toFloat()
+        _rawCropRect.left = (_rawCropRect.left / widthScale).toInt()
+        _rawCropRect.right = (_rawCropRect.right / widthScale).toInt()
+        _rawCropRect.top = (_rawCropRect.top / heightScale).toInt()
+        _rawCropRect.bottom = (_rawCropRect.bottom / heightScale).toInt()
+    }
+
+    private fun configurePreviewSize(textureWidth: Int, textureHeight: Int) {
         val map = _manager.getCameraCharacteristics(_camId).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
         val surfaceSizeSupport = map!!.getOutputSizes(SurfaceTexture::class.java)
-        _previewSize = appropriateSize(width, height, surfaceSizeSupport)
+        _previewSize = getAppropriateSize(textureWidth, textureHeight, surfaceSizeSupport)
+    }
+
+    // Must places after _previewSize and configureCropRect.
+    private fun transformCropRect() {
+        _transformCropRect = Rect(
+                _rawCropRect.top,
+                _previewSize.width - _rawCropRect.right - _rawCropRect.left,
+                _rawCropRect.right,
+                _rawCropRect.bottom
+        )
+
+//        _transformCropRect = Rect(0,0,640,480)
     }
 
     // Must places after _previewSize has been configured
@@ -124,15 +155,13 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-
     private fun startPreviewSession() {
         try {
             // Preview size follow through screen
             // But SDK function is not follow with device screen.
             // So larger size belong to width
             // Put here to prevent Redmi Note 5 onResume bent the preview camera.
-//            _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
-
+            _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
             setupScanImageReader()
             val previewSurface = Surface(_surfaceTexture)
             val scanSurface = _scanImageReader?.surface
@@ -171,7 +200,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
     // For more information about this function go to https://github.com/googlesamples/android-Camera2Basic
     // With function name chooseOptimalSize
-    private fun appropriateSize(textureWidth: Int, textureHeight: Int, choices: Array<Size>): Size {
+    private fun getAppropriateSize(textureWidth: Int, textureHeight: Int, choices: Array<Size>): Size {
 
         val bigger = arrayListOf<Size>()
         val smaller = arrayListOf<Size>()
@@ -214,17 +243,37 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
+    private fun imageToLuminance(image: Image): ByteArray {
+        val yBuffer = image.planes[0].buffer
+
+        val yBytes = ByteArray(yBuffer.capacity())
+        yBuffer.get(yBytes, 0, yBuffer.capacity())
+
+        val yChanel = ByteArray(3 * yBuffer.capacity() / 2)
+
+        var lastPos = 0
+        for (row in _transformCropRect.top until _transformCropRect.top + _transformCropRect.bottom) {
+            System.arraycopy(yBytes, row * image.width + _transformCropRect.left, yChanel, lastPos, _transformCropRect.right)
+            lastPos += _transformCropRect.right
+        }
+
+        return yChanel
+    }
+
     private fun imageToI420(image: Image): ByteArray {
         val yBuffer = image.planes[0].buffer
         val uBuffer = image.planes[1].buffer
         val vBuffer = image.planes[2].buffer
 
-        val i420 = ByteArray(yBuffer.remaining() + uBuffer.remaining() + vBuffer.remaining())
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
 
-        yBuffer.get(i420, 0, yBuffer.remaining())
-        // Missing UV planes, for better performance
-        // uBuffer.get(i420, ySize, uSize)
-        // vBuffer.get(i420, ySize + uSize, vSize)
+        val i420 = ByteArray(ySize + uSize + vSize)
+
+        yBuffer.get(i420, 0, ySize)
+//        uBuffer.get(i420, ySize, uSize)
+//        vBuffer.get(i420, ySize + uSize, vSize)
 
         return i420
     }
@@ -232,7 +281,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private val _imageReaderListener = ImageReader.OnImageAvailableListener { imageReader ->
         if (!_lockScan) {
             val imageScan = imageReader.acquireNextImage()
-            val byteArray = imageToI420(imageScan)
+            val byteArray = imageToLuminance(imageScan)
+//            val byteArray = imageToI420(imageScan)
 
             // Description like setDefaultBufferSize
             _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, imageScan.height, imageScan.width, _barcodeFormatReader).execute()
@@ -243,14 +293,17 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onPreBarCodeRead() {
-//        Log.e("@@", "===")
-//        Log.e("@@", "Scan Lock")
         _lockScan = true
     }
 
     override fun onBarCodeRead(result: String?) {
-//        Log.e("@@", "Scan UnLock")
         _lockScan = false
+        if (result != null) {
+            _context
+                    .getNativeModule(UIManagerModule::class.java)
+                    .eventDispatcher
+                    .dispatchEvent(OnBarCodeReadEvent(id, result))
+        }
     }
 
     private val _cameraStateCallback = object : CameraDevice.StateCallback() {

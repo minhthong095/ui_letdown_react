@@ -4,9 +4,17 @@ import React from 'react'
 const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
 
 export const BarCodeCamera = props => {
+
+    function onBarCodeRead(event) {
+        if (props.onBarCodeRead != null) {
+            props.onBarCodeRead(event.nativeEvent.result)
+        }
+    }
+
     return (
         <BarCodeCameraView
             {...props}
+            onBarCodeRead={onBarCodeRead}
         />
     )
 }
@@ -33,9 +41,11 @@ export const BarCodeCameraType = {
 }
 
 BarCodeCamera.defaultProp = {
-    barcodeTypes: []
+    barcodeTypes: [],
+    onBarCodeRead: (result) => { }
 }
 
 BarCodeCamera.propTypes = {
-    barcodeTypes: PropTypes.arrayOf(PropTypes.string)
+    barcodeTypes: PropTypes.arrayOf(PropTypes.string),
+    onBarCodeRead: PropTypes.func
 }

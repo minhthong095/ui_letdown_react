@@ -5,7 +5,7 @@ import { ImgUrl } from '../../global/img_url';
 
 export const FlashOnOff = props => {
 
-    const [isFlash, setFlash] = useState(true)
+    const [isFlash, setFlash] = useState(false)
 
     function pressFlash() {
         setFlash(!isFlash)
@@ -19,6 +19,6 @@ export const FlashOnOff = props => {
 }
 
 const Img = styled(Image)`
-    width: 30;
-    height: 30;
+    width: 29;
+    height: 29;
 `
