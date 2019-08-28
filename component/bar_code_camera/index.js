@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import { requireNativeComponent, StyleSheet } from 'react-native'
-import React from 'react'
+import { requireNativeComponent, StyleSheet, View } from 'react-native'
+import React, { memo } from 'react'
 const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
 
-export const BarCodeCamera = props => {
+export const BarCodeCamera = memo(({ ...props }) => {
 
     function onBarCodeRead(event) {
         if (props.onBarCodeRead != null) {
@@ -12,12 +12,13 @@ export const BarCodeCamera = props => {
     }
 
     return (
-        <BarCodeCameraView
-            {...props}
-            onBarCodeRead={onBarCodeRead}
-        />
+        // <BarCodeCameraView
+        //     {...props}
+        //     onBarCodeRead={onBarCodeRead}
+        // />
+        <View />
     )
-}
+})
 
 export const BarCodeCameraType = {
     AZTEC: 'AZTEC',

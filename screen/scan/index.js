@@ -1,11 +1,9 @@
 import styled from 'styled-components'
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PermissionsAndroid, NativeModules, AppState, requireNativeComponent } from 'react-native';
 import { Navigation, Stack } from '../../navigation/navigation';
 import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
-// import CheckBox from '../../component/checkbox/checkbox';
-const AndroidCheckBox = requireNativeComponent('AndroidCheckBox')
 
 const { OpenSetting } = NativeModules
 
@@ -13,6 +11,7 @@ export const Scan = () => {
 
     const [isAskPermission, setAskPermission] = useState(false);
     const [isEnableScanBtn, setEnableScanBtn] = useState(false)
+
     const isAlreadyInit = useRef(null)
 
     useEffect(_ => {
@@ -25,7 +24,7 @@ export const Scan = () => {
         })
     }, []);
 
-    function checkCameraPermission() {
+    const checkCameraPermission = useCallback(_ => {
         PermissionsAndroid
             .check(PermissionsAndroid.PERMISSIONS.CAMERA)
             .then(checked => {
@@ -38,9 +37,9 @@ export const Scan = () => {
                     setEnableScanBtn(true)
                 }
             })
-    }
+    }, [])
 
-    function requestCameraCheckFirstime() {
+    const requestCameraCheckFirstime = useCallback(_ => {
         PermissionsAndroid
             .request(PermissionsAndroid.PERMISSIONS.CAMERA)
             .then(result => {
@@ -51,9 +50,9 @@ export const Scan = () => {
                     setEnableScanBtn(true)
                 }
             })
-    }
+    }, [])
 
-    function requestCameraToCheck() {
+    const requestCameraToCheck = useCallback(_ => {
         PermissionsAndroid
             .request(PermissionsAndroid.PERMISSIONS.CAMERA)
             .then(result => {
@@ -66,18 +65,15 @@ export const Scan = () => {
                     setEnableScanBtn(true)
                 }
             })
-    }
+    }, [])
 
     function _openCamera() {
         if (isEnableScanBtn) {
-            console.log('State; ' + Navigation.getState())
             Navigation.stackNavigate(Stack.ScanCamera)
         }
     }
 
-    function getActiveScanBtn() {
-        return isEnableScanBtn == true ? 0.2 : 1
-    }
+    const _getActiveScanBtn = isEnableScanBtn == true ? 0.2 : 1
 
     return (
         <Container>
@@ -94,7 +90,7 @@ export const Scan = () => {
                 }
             </ContainerVisualCamera>
             <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: 'green' }} />
-            <TouchableOpacity activeOpacity={getActiveScanBtn()} onPress={_openCamera}>
+            <TouchableOpacity activeOpacity={_getActiveScanBtn} onPress={_openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>
                 </ScanButton>

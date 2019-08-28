@@ -1,10 +1,10 @@
-import React, { useRef, useLayoutEffect, useEffect, useState, Fragment } from 'react'
+import React, { useRef, useLayoutEffect, useEffect, useState, Fragment, memo } from 'react'
 import styled from 'styled-components'
 import { View } from 'react-native'
 import PropTypes from 'prop-types';
 import { CornerProtect } from '../corner_protect'
 
-export const CropRegion = props => {
+export const CropRegion = memo(({ ...props }) => {
 
     return (
         <Container>
@@ -20,7 +20,7 @@ export const CropRegion = props => {
             <Bottom {...props} />
         </Container>
     )
-}
+})
 
 const Container = styled(View)`
     position: absolute;

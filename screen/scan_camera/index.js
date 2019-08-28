@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { View, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert } from 'react-native'
@@ -12,8 +12,9 @@ import { BarCodeCamera } from '../../component/bar_code_camera';
 export const ScanCamera = props => {
 
     const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
+    const [flash, setFlash] = useState(false)
 
-    const onContainerLayout = event => {
+    function onContainerLayout(event) {
         const { width, height } = event.nativeEvent.layout;
         const { widthCrop, heightCrop, yCrop } = props
 
@@ -25,7 +26,16 @@ export const ScanCamera = props => {
             setDimensionContainer({ widthContainer: width, heightContainer: height })
     }
 
-    const getCropData = (widthCrop, heightCrop, yCrop, xCrop) => {
+    // const _getCropData = useCallback((widthCrop, heightCrop, yCrop, xCrop) => {
+    //     return (
+    //         PixelRatio.getPixelSizeForLayoutSize(xCrop) + ","
+    //         + PixelRatio.getPixelSizeForLayoutSize(yCrop) + ","
+    //         + PixelRatio.getPixelSizeForLayoutSize(widthCrop) + ","
+    //         + PixelRatio.getPixelSizeForLayoutSize(heightCrop)
+    //     )
+    // }, [widthCrop, heightCrop, yCrop, xCrop])
+
+    const _getCropData = (widthCrop, heightCrop, yCrop, xCrop) => {
         return (
             PixelRatio.getPixelSizeForLayoutSize(xCrop) + ","
             + PixelRatio.getPixelSizeForLayoutSize(yCrop) + ","
@@ -34,21 +44,22 @@ export const ScanCamera = props => {
         )
     }
 
+
+    function _onClickFlash(flashState) {
+        setFlash(flashState)
+    }
+
     const { widthCrop, heightCrop, yCrop } = props
     const xCrop = (dimensionContainer.widthContainer - widthCrop) / 2
 
+    console.log('REnder')
     return (
         <Container onLayout={onContainerLayout}>
             {
                 dimensionContainer.widthContainer === undefined ? null :
                     <Container>
                         <BarCodeCamera
-                            // onBarCodeRead={result => {
-                            //     console.log('Result: ' + result)
-                            //     Navigation.stackPop()
-                            //     Alert.alert(result)
-                            // }}
-                            cropData={getCropData(widthCrop, heightCrop, yCrop, xCrop)}
+                            cropData={_getCropData(widthCrop, heightCrop, yCrop, xCrop)}
                             style={StyleSheet.absoluteFill} />
                         <CropRegion
                             widthContainer={dimensionContainer.widthContainer}
@@ -61,7 +72,7 @@ export const ScanCamera = props => {
                         <TouchableOpacityAbort onPress={_ => { Navigation.stackPop() }}>
                             <AbortX source={ImgUrl.ABORT_X} />
                         </TouchableOpacityAbort>
-                        <Flash />
+                        <Flash onClickFlash={_onClickFlash} />
                     </Container>
             }
         </Container>
