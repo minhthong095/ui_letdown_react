@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { View, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert } from 'react-native'
@@ -13,6 +13,7 @@ export const ScanCamera = props => {
 
     const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
     const [flashState, setFlash] = useState(FlashConstant.INIT)
+    const lockRef = useRef(false)
 
     function onContainerLayout(event) {
         const { width, height } = event.nativeEvent.layout;
@@ -49,6 +50,13 @@ export const ScanCamera = props => {
                 dimensionContainer.widthContainer === undefined ? null :
                     <Container>
                         <BarCodeCamera
+                            onBarCodeRead={result => {
+                                if (!lockRef.current) {
+                                    lockRef.current = true
+                                    Alert.alert(result)
+                                    Navigation.stackPop()
+                                }
+                            }}
                             flash={flashState}
                             cropData={_getCropData(widthCrop, heightCrop, yCrop, xCrop)}
                             style={StyleSheet.absoluteFill} />

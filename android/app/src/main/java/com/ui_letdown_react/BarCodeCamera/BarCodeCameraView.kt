@@ -279,6 +279,10 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private fun imageToLuminance(image: Image): ByteArray {
         val yBuffer = image.planes[0].buffer
 
+        // nexus h:480 w:640 _previewSize.height, _previewSize.width | work
+        // nexus h:640 w:480 _previewSize.width, _previewSize.height | work
+        // redmi note 2 h:1080 x w: 1440  _previewSize.height, _previewSize.width | work in rmnote2
+        // redmi note 2 h: x w:   _previewSize.width, _previewSize.width | not work in rmnote2
         val yBytes = ByteArray(yBuffer.capacity())
         yBuffer.get(yBytes, 0, yBuffer.capacity())
 
