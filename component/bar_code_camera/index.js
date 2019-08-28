@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { requireNativeComponent, StyleSheet, View } from 'react-native'
 import React, { memo } from 'react'
+import { FlashConstant } from '../flash_on_off';
 const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
 
 export const BarCodeCamera = memo(({ ...props }) => {
@@ -12,11 +13,10 @@ export const BarCodeCamera = memo(({ ...props }) => {
     }
 
     return (
-        // <BarCodeCameraView
-        //     {...props}
-        //     onBarCodeRead={onBarCodeRead}
-        // />
-        <View />
+        <BarCodeCameraView
+            {...props}
+            onBarCodeRead={onBarCodeRead}
+        />
     )
 })
 
@@ -43,10 +43,13 @@ export const BarCodeCameraType = {
 
 BarCodeCamera.defaultProp = {
     barcodeTypes: [],
-    onBarCodeRead: (result) => { }
+    onBarCodeRead: _ => { },
+    flash: FlashConstant.INIT
+
 }
 
 BarCodeCamera.propTypes = {
     barcodeTypes: PropTypes.arrayOf(PropTypes.string),
-    onBarCodeRead: PropTypes.func
+    onBarCodeRead: PropTypes.func,
+    flash: PropTypes.string
 }

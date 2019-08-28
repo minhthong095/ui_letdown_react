@@ -8,7 +8,6 @@ import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
 import android.os.AsyncTask
-import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -20,13 +19,17 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.ui_letdown_react.BarCodeCamera.Event.OnBarCodeReadEvent
-import org.reactnative.camera.events.BarCodeReadEvent
-import java.io.File
+import org.reactnative.camera.CameraViewManager
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.HashMap
 
 class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), BarCodeAsyncTaskDelegate, TextureView.SurfaceTextureListener {
+
+
+    private val FLASH_INIT = "init"
+    private val FLASH_ON = "on"
+    private val FLASH_OFF = "off"
 
     private var _camera: CameraDevice? = null
     private var _session: CameraCaptureSession? = null
@@ -41,6 +44,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private lateinit var _surfaceTexture: SurfaceTexture
     private var _rawCropRect = Rect()
     private var _transformCropRect = Rect()
+    private var _flashMode = FLASH_INIT
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -71,6 +75,23 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         val hints = HashMap<DecodeHintType, Any>(DecodeHintType.values().size)
         hints[DecodeHintType.POSSIBLE_FORMATS] = codes
         _barcodeFormatReader.setHints(hints)
+    }
+
+    fun setFlash(flash: String) {
+        _flashMode = flash
+        if (_flashMode == FLASH_INIT)
+            return
+
+        if (_flashMode != FLASH_INIT)
+            updateFlash()
+
+        if (_session != null) {
+            try {
+                _session!!.setRepeatingRequest(_requestBuilder.build(), null, null)
+            } catch (e: CameraAccessException) {
+                throw e
+            }
+        }
     }
 
     @SuppressLint("NewApi")
@@ -104,6 +125,19 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
+    private fun updateFlash() {
+        when(_flashMode) {
+            FLASH_ON -> {
+                _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+                _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+            }
+            FLASH_OFF -> {
+                _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+                _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF)
+            }
+        }
+    }
+
     // Must places after _previewSize has been configured
     private fun configureCropRect(textureWidth: Int, textureHeight: Int) {
         val widthScale = textureWidth.toFloat() / _previewSize.width.toFloat()
@@ -128,8 +162,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 _rawCropRect.bottom,
                 _rawCropRect.right
         )
-
-//        _transformCropRect = Rect(0,0,640,480)
     }
 
     // Must places after _previewSize has been configured
@@ -166,6 +198,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             val previewSurface = Surface(_surfaceTexture)
             val scanSurface = _scanImageReader?.surface
             _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            updateFlash()
             _requestBuilder.addTarget(previewSurface)
             _requestBuilder.addTarget(scanSurface!!)
 
@@ -194,7 +227,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     private fun setupScanImageReader() {
-        _scanImageReader = ImageReader.newInstance(_previewSize.width, _previewSize.height, ImageFormat.YUV_420_888, 1)
+        _scanImageReader = ImageReader.newInstance(_previewSize.height, _previewSize.width, ImageFormat.YUV_420_888, 1)
         _scanImageReader?.setOnImageAvailableListener(_imageReaderListener, null)
     }
 

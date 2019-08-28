@@ -63,6 +63,11 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
         }
     }
 
+    @ReactProp(name = "flash")
+    fun setBarcodeTypes(view: BarCodeCameraView, flash: String) {
+        view.setFlash(flash)
+    }
+
     // JS will handle wrong data format. This method will be considered perfect.
     @ReactProp(name = "cropData")
     fun setCropData(view: BarCodeCameraView, cropData: String) {

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { View, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert } from 'react-native'
 import { ImgUrl } from '../../global/img_url';
-import { FlashOnOff } from '../../component/flash_on_off';
+import { FlashOnOff, FlashConstant } from '../../component/flash_on_off';
 import { CropRegion } from '../../component/crop_region';
 import { MockCamera } from '../../component/mock_camera';
 import { Navigation } from '../../navigation/navigation';
@@ -12,7 +12,7 @@ import { BarCodeCamera } from '../../component/bar_code_camera';
 export const ScanCamera = props => {
 
     const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
-    const [flash, setFlash] = useState(false)
+    const [flashState, setFlash] = useState(FlashConstant.INIT)
 
     function onContainerLayout(event) {
         const { width, height } = event.nativeEvent.layout;
@@ -26,16 +26,7 @@ export const ScanCamera = props => {
             setDimensionContainer({ widthContainer: width, heightContainer: height })
     }
 
-    // const _getCropData = useCallback((widthCrop, heightCrop, yCrop, xCrop) => {
-    //     return (
-    //         PixelRatio.getPixelSizeForLayoutSize(xCrop) + ","
-    //         + PixelRatio.getPixelSizeForLayoutSize(yCrop) + ","
-    //         + PixelRatio.getPixelSizeForLayoutSize(widthCrop) + ","
-    //         + PixelRatio.getPixelSizeForLayoutSize(heightCrop)
-    //     )
-    // }, [widthCrop, heightCrop, yCrop, xCrop])
-
-    const _getCropData = (widthCrop, heightCrop, yCrop, xCrop) => {
+    function _getCropData(widthCrop, heightCrop, yCrop, xCrop) {
         return (
             PixelRatio.getPixelSizeForLayoutSize(xCrop) + ","
             + PixelRatio.getPixelSizeForLayoutSize(yCrop) + ","
@@ -43,7 +34,6 @@ export const ScanCamera = props => {
             + PixelRatio.getPixelSizeForLayoutSize(heightCrop)
         )
     }
-
 
     function _onClickFlash(flashState) {
         setFlash(flashState)
@@ -59,6 +49,7 @@ export const ScanCamera = props => {
                 dimensionContainer.widthContainer === undefined ? null :
                     <Container>
                         <BarCodeCamera
+                            flash={flashState}
                             cropData={_getCropData(widthCrop, heightCrop, yCrop, xCrop)}
                             style={StyleSheet.absoluteFill} />
                         <CropRegion
@@ -72,7 +63,7 @@ export const ScanCamera = props => {
                         <TouchableOpacityAbort onPress={_ => { Navigation.stackPop() }}>
                             <AbortX source={ImgUrl.ABORT_X} />
                         </TouchableOpacityAbort>
-                        <Flash onClickFlash={_onClickFlash} />
+                        <Flash flash={flashState} onClickFlash={_onClickFlash} />
                     </Container>
             }
         </Container>
