@@ -19,7 +19,6 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.ui_letdown_react.BarCodeCamera.Event.OnBarCodeReadEvent
-import org.reactnative.camera.CameraViewManager
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.HashMap
@@ -45,6 +44,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _rawCropRect = Rect()
     private var _transformCropRect = Rect()
     private var _flashMode = FLASH_INIT
+    private lateinit var _characteristics: CameraCharacteristics
+    private val _exposureValue = -2
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -83,7 +84,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             return
 
         if (_flashMode != FLASH_INIT)
-            updateFlash()
+            setupFlash()
 
         if (_session != null) {
             try {
@@ -112,6 +113,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
                 _camId = camId
                 _surfaceTexture = surfaceTexture
+                _characteristics = characteristics
 
                 configurePreviewSize(width, height)
                 configureCropRect(width, height)
@@ -125,14 +127,43 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private fun updateFlash() {
-        when(_flashMode) {
+    // Must be place after _requestBuilder has created
+    private fun setupBarcodeScene() {
+        val availableScenes: IntArray? = _characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES)
+        if (availableScenes != null && availableScenes.contains(CaptureRequest.CONTROL_SCENE_MODE_BARCODE)) {
+            _requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE)
+            _requestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CameraMetadata.CONTROL_SCENE_MODE_BARCODE)
+        }
+    }
+
+    // Range [0,0] indicates that exposure compensation is not supported.
+    // Must be place after _requestBuilder
+    private fun setupExposeCompensation() {
+        val range = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
+        val step = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP)
+        if (step != null && range != null && range.lower != 0) {
+            _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+            _requestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, (_exposureValue * step.denominator) / step.numerator)
+        }
+    }
+
+    // For lower brightness to easy detect shapes. Adjust right on camera sensor.
+    // But have to hide it because Redmi Note 5 also not support REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR yet.
+    private fun setupCustomAEMode() {
+        val availableCapabilities = _characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+        if (availableCapabilities != null && availableCapabilities.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR)) {
+            val exporeTimeRange = _characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
+            val isoRange = _characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
+            val frameDurationMax = _characteristics.get(CameraCharacteristics.SENSOR_INFO_MAX_FRAME_DURATION)
+        }
+    }
+
+    private fun setupFlash() {
+        when (_flashMode) {
             FLASH_ON -> {
-                _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
                 _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
             }
             FLASH_OFF -> {
-                _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
                 _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF)
             }
         }
@@ -149,7 +180,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     private fun configurePreviewSize(textureWidth: Int, textureHeight: Int) {
-        val map = _manager.getCameraCharacteristics(_camId).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+        val map = _characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
         val surfaceSizeSupport = map!!.getOutputSizes(SurfaceTexture::class.java)
         _previewSize = getAppropriateSize(textureWidth, textureHeight, surfaceSizeSupport)
     }
@@ -197,32 +228,36 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             setupScanImageReader()
             val previewSurface = Surface(_surfaceTexture)
             val scanSurface = _scanImageReader?.surface
-            _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            updateFlash()
+            _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_MANUAL)
             _requestBuilder.addTarget(previewSurface)
             _requestBuilder.addTarget(scanSurface!!)
 
-//            val characteristic = _manager.getCameraCharacteristics(_camId)
-//            val rectArray = characteristic.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
-//            val max = characteristic.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
-//            if (rectArray != null) {
-//                val cropW = rectArray.width() / 2
-//                val cropH = rectArray.height() / 2
-//                val rectCrop = Rect(0,0, cropW, cropH)
-//                val centerX = rectArray.centerX()
-//                val centerXCrop = rectCrop.centerX()
-//                val centerY = rectArray.centerY()
-//                val centerYCrop = rectCrop.centerY()
-//                val a = rectArray.width() / max
-//                val b = rectArray.height() / max
-//                rectCrop.offsetTo(centerX - centerXCrop, centerY - centerYCrop)
-//                _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, Rect(0,0, cropW, cropH))
-//            }
+            setupFlash()
+            setupBarcodeScene()
+            setupExposeCompensation()
+            setupZoom()
 
             _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
 
         } catch (er: CameraAccessException) {
             throw er
+        }
+    }
+
+    private fun setupZoom() {
+        val characteristic = _manager.getCameraCharacteristics(_camId)
+        val rectArray = characteristic.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        val max = characteristic.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
+        if (rectArray != null && max != null) {
+            val cropW = rectArray.width() / 2
+            val cropH = rectArray.height() / 2
+            val rectCrop = Rect(0, 0, cropW, cropH)
+            val centerX = rectArray.centerX()
+            val centerXCrop = rectCrop.centerX()
+            val centerY = rectArray.centerY()
+            val centerYCrop = rectCrop.centerY()
+            rectCrop.offsetTo(centerX - centerXCrop, centerY - centerYCrop)
+            _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, Rect(0, 0, cropW, cropH))
         }
     }
 

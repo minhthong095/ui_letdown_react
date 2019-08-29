@@ -91,8 +91,8 @@ const Flash = styled(FlashOnOff)`
 `
 
 const AbortX = styled(Image)`
-    width: 39;
-    height: 39
+    width: 38;
+    height: 38
 `
 const Container = styled(View)`
     flex: 1;
