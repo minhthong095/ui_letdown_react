@@ -228,14 +228,14 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             setupScanImageReader()
             val previewSurface = Surface(_surfaceTexture)
             val scanSurface = _scanImageReader?.surface
-            _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_MANUAL)
+            _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             _requestBuilder.addTarget(previewSurface)
             _requestBuilder.addTarget(scanSurface!!)
 
             setupFlash()
             setupBarcodeScene()
             setupExposeCompensation()
-            setupZoom()
+//            setupZoom()
 
             _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
 
