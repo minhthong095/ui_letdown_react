@@ -53,7 +53,7 @@ export const ScanCamera = props => {
                             onBarCodeRead={result => {
                                 if (!lockRef.current) {
                                     lockRef.current = true
-                                    Alert.alert(result)
+                                    Alert.alert("", result)
                                     Navigation.stackPop()
                                 }
                             }}
@@ -91,8 +91,8 @@ const Flash = styled(FlashOnOff)`
 `
 
 const AbortX = styled(Image)`
-    width: 38;
-    height: 38
+    width: 36;
+    height: 36
 `
 const Container = styled(View)`
     flex: 1;

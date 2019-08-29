@@ -60,7 +60,7 @@ const CropBorder = styled(View)`
 
 const OpacityBlack = styled(View)`
     background-color: black;
-    opacity: 0.17;
+    opacity: 0.4;
 `
 
 const Top = styled(OpacityBlack)`

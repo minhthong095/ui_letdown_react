@@ -35,8 +35,8 @@ export const FlashOnOff = memo(({ ...props }) => {
 })
 
 const Img = styled(Image)`
-    width: 28;
-    height: 28;
+    width: 26;
+    height: 26;
 `
 
 FlashOnOff.defaultProps = {

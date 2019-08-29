@@ -19,12 +19,12 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.ui_letdown_react.BarCodeCamera.Event.OnBarCodeReadEvent
+import java.io.File
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.HashMap
 
 class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), BarCodeAsyncTaskDelegate, TextureView.SurfaceTextureListener {
-
 
     private val FLASH_INIT = "init"
     private val FLASH_ON = "on"
@@ -34,7 +34,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _session: CameraCaptureSession? = null
     private lateinit var _manager: CameraManager
     private lateinit var _requestBuilder: CaptureRequest.Builder
-    private var _scanImageReader: ImageReader? = null
     private lateinit var _previewSize: Size
     private var _camId: String = ""
     private var _lockScan: Boolean = false
@@ -42,7 +41,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private val _barcodeFormatReader = MultiFormatReader()
     private lateinit var _surfaceTexture: SurfaceTexture
     private var _rawCropRect = Rect()
-    private var _transformCropRect = Rect()
     private var _flashMode = FLASH_INIT
     private lateinit var _characteristics: CameraCharacteristics
     private val _exposureValue = -2
@@ -53,9 +51,13 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
+
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+        if (!_lockScan) {
+            _taskBarCodeRead = BarCodeRGBAsyncTask(_rawCropRect,this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
+        }
     }
 
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
@@ -117,7 +119,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
                 configurePreviewSize(width, height)
                 configureCropRect(width, height)
-                transformCropRect()
                 configureTransform(width, height)
 
                 _manager.openCamera(_camId, _cameraStateCallback, null)
@@ -185,16 +186,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         _previewSize = getAppropriateSize(textureWidth, textureHeight, surfaceSizeSupport)
     }
 
-    // Must places after _previewSize and configureCropRect.
-    private fun transformCropRect() {
-        _transformCropRect = Rect(
-                _rawCropRect.top,
-                _previewSize.width - _rawCropRect.right - _rawCropRect.left,
-                _rawCropRect.bottom,
-                _rawCropRect.right
-        )
-    }
-
     // Must places after _previewSize has been configured
     private fun configureTransform(textureWidth: Int, textureHeight: Int) {
         val texture = RectF(0f, 0f, textureWidth.toFloat(), textureHeight.toFloat())
@@ -225,19 +216,16 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             // So larger size belong to width
             // Put here to prevent Redmi Note 5 onResume bent the preview camera.
             _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
-            setupScanImageReader()
             val previewSurface = Surface(_surfaceTexture)
-            val scanSurface = _scanImageReader?.surface
             _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             _requestBuilder.addTarget(previewSurface)
-            _requestBuilder.addTarget(scanSurface!!)
 
             setupFlash()
             setupBarcodeScene()
-            setupExposeCompensation()
+//            setupExposeCompensation()
 //            setupZoom()
 
-            _camera!!.createCaptureSession(mutableListOf(previewSurface, scanSurface), _sessionCallback, null)
+            _camera!!.createCaptureSession(mutableListOf(previewSurface), _sessionCallback, null)
 
         } catch (er: CameraAccessException) {
             throw er
@@ -259,11 +247,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             rectCrop.offsetTo(centerX - centerXCrop, centerY - centerYCrop)
             _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, Rect(0, 0, cropW, cropH))
         }
-    }
-
-    private fun setupScanImageReader() {
-        _scanImageReader = ImageReader.newInstance(_previewSize.height, _previewSize.width, ImageFormat.YUV_420_888, 1)
-        _scanImageReader?.setOnImageAvailableListener(_imageReaderListener, null)
     }
 
     // For more information about this function go to https://github.com/googlesamples/android-Camera2Basic
@@ -311,58 +294,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private fun imageToLuminance(image: Image): ByteArray {
-        val yBuffer = image.planes[0].buffer
-
-        // nexus h:480 w:640 _previewSize.height, _previewSize.width | work
-        // nexus h:640 w:480 _previewSize.width, _previewSize.height | work
-        // redmi note 2 h:1080 x w: 1440  _previewSize.height, _previewSize.width | work in rmnote2
-        // redmi note 2 h: x w:   _previewSize.width, _previewSize.width | not work in rmnote2
-        val yBytes = ByteArray(yBuffer.capacity())
-        yBuffer.get(yBytes, 0, yBuffer.capacity())
-
-        val yChanel = ByteArray(3 * yBuffer.capacity() / 2)
-
-        var lastPos = 0
-        for (row in _transformCropRect.top until _transformCropRect.top + _transformCropRect.bottom) {
-            System.arraycopy(yBytes, row * image.width + _transformCropRect.left, yChanel, lastPos, _transformCropRect.right)
-            lastPos += _transformCropRect.right
-        }
-
-        return yChanel
-    }
-
-    private fun imageToI420(image: Image): ByteArray {
-        val yBuffer = image.planes[0].buffer
-        val uBuffer = image.planes[1].buffer
-        val vBuffer = image.planes[2].buffer
-
-        val ySize = yBuffer.remaining()
-        val uSize = uBuffer.remaining()
-        val vSize = vBuffer.remaining()
-
-        val i420 = ByteArray(ySize + uSize + vSize)
-
-        yBuffer.get(i420, 0, ySize)
-//        uBuffer.get(i420, ySize, uSize)
-//        vBuffer.get(i420, ySize + uSize, vSize)
-
-        return i420
-    }
-
-    private val _imageReaderListener = ImageReader.OnImageAvailableListener { imageReader ->
-        if (!_lockScan) {
-            val imageScan = imageReader.acquireNextImage()
-            val byteArray = imageToLuminance(imageScan)
-
-            // Description like setDefaultBufferSize
-            _taskBarCodeRead = BarCodeAsyncTask(this, byteArray, _transformCropRect.bottom, _transformCropRect.right, _barcodeFormatReader).execute()
-            imageScan.close()
-        } else {
-            imageReader.acquireNextImage().close()
-        }
-    }
-
     override fun onPreBarCodeRead() {
         _lockScan = true
     }
@@ -404,7 +335,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         _camera?.close()
         _camera = null
         _taskBarCodeRead?.cancel(true)
-        _scanImageReader?.close()
     }
 
     private class Conditioner : Comparator<Size> {
