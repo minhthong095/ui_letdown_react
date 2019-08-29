@@ -222,8 +222,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
             setupFlash()
             setupBarcodeScene()
-//            setupExposeCompensation()
-//            setupZoom()
+            setupZoom()
 
             _camera!!.createCaptureSession(mutableListOf(previewSurface), _sessionCallback, null)
 
@@ -233,19 +232,14 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     private fun setupZoom() {
-        val characteristic = _manager.getCameraCharacteristics(_camId)
-        val rectArray = characteristic.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
-        val max = characteristic.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
+        val rectArray = _characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        val max = _characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
         if (rectArray != null && max != null) {
-            val cropW = rectArray.width() / 2
-            val cropH = rectArray.height() / 2
-            val rectCrop = Rect(0, 0, cropW, cropH)
-            val centerX = rectArray.centerX()
-            val centerXCrop = rectCrop.centerX()
-            val centerY = rectArray.centerY()
-            val centerYCrop = rectCrop.centerY()
-            rectCrop.offsetTo(centerX - centerXCrop, centerY - centerYCrop)
-            _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, Rect(0, 0, cropW, cropH))
+            // 0.3 base on max, 0.5 = max / 2
+            val scaledZoom = 0.15 * (max - 1.0f) + 1.0f
+            val rectCrop = Rect(0, 0, (rectArray.width() / scaledZoom).toInt(), (rectArray.height() / scaledZoom).toInt())
+            rectCrop.offsetTo(rectArray.centerX() - rectCrop.centerX(), rectArray.centerY() - rectCrop.centerY())
+            _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rectCrop)
         }
     }
 
