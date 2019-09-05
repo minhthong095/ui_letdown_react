@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useEffect, useState, Fragment, memo } from 'react'
 import styled from 'styled-components'
-import { View } from 'react-native'
+import { View, TouchableWithoutFeedback } from 'react-native'
 import PropTypes from 'prop-types';
 import { CornerProtect } from '../corner_protect'
 
@@ -10,12 +10,14 @@ export const CropRegion = memo(({ ...props }) => {
         <Container>
             <Top {...props} />
             <CropLeft {...props} />
-            <CropBorder {...props}>
-                <CornerProtect />
-                <CropProtectTopRight type={'topRight'} />
-                <CropProtectBottomLeft type={'bottomLeft'} />
-                <CropProtectBottomRight type={'bottomRight'} />
-            </CropBorder>
+            <TouchableWithoutFeedback onPress={_ => { props.onTouchCrop() }}>
+                <CropBorder {...props}>
+                    <CornerProtect />
+                    <CropProtectTopRight type={'topRight'} />
+                    <CropProtectBottomLeft type={'bottomLeft'} />
+                    <CropProtectBottomRight type={'bottomRight'} />
+                </CropBorder>
+            </TouchableWithoutFeedback>
             <CropRight {...props} />
             <Bottom {...props} />
         </Container>
@@ -60,7 +62,7 @@ const CropBorder = styled(View)`
 
 const OpacityBlack = styled(View)`
     background-color: black;
-    opacity: 0.4;
+    opacity: 0;
 `
 
 const Top = styled(OpacityBlack)`
@@ -95,11 +97,16 @@ const Bottom = styled(OpacityBlack)`
     right: 0;
 `
 
+CropRegion.defaultProps = {
+    onTouchCrop: () => { }
+}
+
 CropRegion.propTypes = {
     widthCrop: PropTypes.number,
     heightCrop: PropTypes.number,
     widthContainer: PropTypes.number,
     heightContainer: PropTypes.number,
     yCrop: PropTypes.number,
-    xCrop: PropTypes.number
+    xCrop: PropTypes.number,
+    onTouchCrop: PropTypes.func
 }

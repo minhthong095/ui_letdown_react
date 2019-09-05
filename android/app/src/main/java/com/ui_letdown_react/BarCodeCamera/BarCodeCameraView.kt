@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.hardware.camera2.*
-import android.media.Image
-import android.media.ImageReader
 import android.os.AsyncTask
 import android.util.Size
 import android.view.Surface
@@ -19,10 +17,14 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.ui_letdown_react.BarCodeCamera.Event.OnBarCodeReadEvent
-import java.io.File
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.HashMap
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.params.MeteringRectangle
+import android.hardware.camera2.CameraCharacteristics
+import android.util.Log
+
 
 class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), BarCodeAsyncTaskDelegate, TextureView.SurfaceTextureListener {
 
@@ -33,7 +35,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _camera: CameraDevice? = null
     private var _session: CameraCaptureSession? = null
     private lateinit var _manager: CameraManager
-    private lateinit var _requestBuilder: CaptureRequest.Builder
+    private lateinit var _previewBuilder: CaptureRequest.Builder
     private lateinit var _previewSize: Size
     private var _camId: String = ""
     private var _lockScan: Boolean = false
@@ -41,9 +43,11 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private val _barcodeFormatReader = MultiFormatReader()
     private lateinit var _surfaceTexture: SurfaceTexture
     private var _rawCropRect = Rect()
+    private var _configureCropRect = Rect()
     private var _flashMode = FLASH_INIT
     private lateinit var _characteristics: CameraCharacteristics
     private val _exposureValue = -2
+    private val _cropRegionOnSensor = Rect()
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -56,7 +60,9 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
         if (!_lockScan) {
-            _taskBarCodeRead = BarCodeRGBAsyncTask(_rawCropRect,this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
+//            val file = File(_context.externalCacheDir, "zoom.jpg")
+//            file.createNewFile()
+            _taskBarCodeRead = BarCodeRGBAsyncTask(_configureCropRect, this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
         }
     }
 
@@ -86,11 +92,87 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             return
 
         if (_flashMode != FLASH_INIT)
-            setupFlash()
+            integrateFlash()
 
+        sendRepeatingRequest()
+    }
+
+    fun touchCrop() {
+        integrateIdleAeAf()
+        sendRepeatingRequest()
+
+        integrateTriggerAeAf()
+        sendCaptureRequest()
+    }
+
+    private fun integrateTriggerAeAf() {
+        _previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
+        _previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START)
+        _previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+    }
+
+    private fun integrateIdleAeAf() {
+        _previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE)
+        _previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE)
+    }
+
+    private fun integrateTouchCrop() {
+        val _cropRegionOnSensorX = Rect(0,0,100,100)
+        val arrayMetering = arrayOf(MeteringRectangle(_cropRegionOnSensorX, 300))
+        _previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+        _previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+        _previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON)
+        _previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, arrayMetering)
+        _previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, arrayMetering)
+    }
+
+    private val mPreviewCallback = object : CameraCaptureSession.CaptureCallback() {
+
+        override fun onCaptureProgressed( session: CameraCaptureSession,
+        request: CaptureRequest,  partialResult: CaptureResult) {
+            super.onCaptureProgressed(session, request, partialResult)
+            Log.e("@@", "Progressed $partialResult")
+        }
+
+        override fun onCaptureCompleted(session: CameraCaptureSession,
+        request: CaptureRequest,  result: TotalCaptureResult) {
+            super.onCaptureCompleted(session, request, result)
+            Log.e("@@", "onCaptureCompleted " + result.get(CaptureResult.CONTROL_AF_STATE))
+            when (result.get(CaptureResult.CONTROL_AF_STATE)) {
+
+                CameraMetadata.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED,
+                CameraMetadata.CONTROL_AF_STATE_FOCUSED_LOCKED
+                -> {
+                    integrateIdleAeAf()
+                    sendRepeatingRequest()
+
+                    _previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                    sendRepeatingRequest()
+                }
+            }
+        }
+
+        override fun onCaptureFailed( session: CameraCaptureSession,
+        request: CaptureRequest,  failure: CaptureFailure) {
+            super.onCaptureFailed(session, request, failure)
+            Log.e("@@", "onCaptureFailed $request")
+        }
+    }
+
+    private fun sendRepeatingRequest() {
         if (_session != null) {
             try {
-                _session!!.setRepeatingRequest(_requestBuilder.build(), null, null)
+                _session!!.setRepeatingRequest(_previewBuilder.build(), mPreviewCallback, null)
+            } catch (e: CameraAccessException) {
+                throw e
+            }
+        }
+    }
+
+    private fun sendCaptureRequest() {
+        if (_session != null) {
+            try {
+                _session!!.capture(_previewBuilder.build(), null, null)
             } catch (e: CameraAccessException) {
                 throw e
             }
@@ -120,6 +202,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 configurePreviewSize(width, height)
                 configureCropRect(width, height)
                 configureTransform(width, height)
+                configureAfAeRegion(width, height)
 
                 _manager.openCamera(_camId, _cameraStateCallback, null)
             } catch (er: CameraAccessException) {
@@ -128,23 +211,14 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    // Must be place after _requestBuilder has created
-    private fun setupBarcodeScene() {
-        val availableScenes: IntArray? = _characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES)
-        if (availableScenes != null && availableScenes.contains(CaptureRequest.CONTROL_SCENE_MODE_BARCODE)) {
-            _requestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE)
-            _requestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, CameraMetadata.CONTROL_SCENE_MODE_BARCODE)
-        }
-    }
-
     // Range [0,0] indicates that exposure compensation is not supported.
-    // Must be place after _requestBuilder
+    // Must be place after _previewBuilder
     private fun setupExposeCompensation() {
         val range = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
         val step = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP)
         if (step != null && range != null && range.lower != 0) {
-            _requestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
-            _requestBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, (_exposureValue * step.denominator) / step.numerator)
+            _previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+            _previewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, (_exposureValue * step.denominator) / step.numerator)
         }
     }
 
@@ -159,25 +233,42 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private fun setupFlash() {
+    private fun integrateFlash() {
         when (_flashMode) {
             FLASH_ON -> {
-                _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+                _previewBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
             }
             FLASH_OFF -> {
-                _requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF)
+                _previewBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF)
             }
         }
     }
 
-    // Must places after _previewSize has been configured
+    // Must places after _previewSize has been configured.
+    // From raw rect on TextureView into convert rect in preview scale.
     private fun configureCropRect(textureWidth: Int, textureHeight: Int) {
         val widthScale = textureWidth.toFloat() / _previewSize.width.toFloat()
         val heightScale = textureHeight.toFloat() / _previewSize.height.toFloat()
-        _rawCropRect.left = (_rawCropRect.left / widthScale).toInt()
-        _rawCropRect.right = (_rawCropRect.right / widthScale).toInt()
-        _rawCropRect.top = (_rawCropRect.top / heightScale).toInt()
-        _rawCropRect.bottom = (_rawCropRect.bottom / heightScale).toInt()
+        _configureCropRect.left = (_rawCropRect.left / widthScale).toInt()
+        _configureCropRect.right = (_rawCropRect.right / widthScale).toInt()
+        _configureCropRect.top = (_rawCropRect.top / heightScale).toInt()
+        _configureCropRect.bottom = (_rawCropRect.bottom / heightScale).toInt()
+    }
+
+    private fun configureAfAeRegion(textureWidth: Int, textureHeight: Int) {
+
+        val sensorActiveArray = _characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+
+        if (sensorActiveArray != null) {
+            val xPercent = _rawCropRect.left * 100 / textureWidth
+            val yPercent = _rawCropRect.top * 100 / textureHeight
+            val widthPercent = _rawCropRect.right * 100 / textureHeight
+            val heightPercent = _rawCropRect.top * 100 / textureHeight
+            _cropRegionOnSensor.left = xPercent * sensorActiveArray.left / 100
+            _cropRegionOnSensor.top = yPercent * sensorActiveArray.top / 100
+            _cropRegionOnSensor.right = widthPercent * sensorActiveArray.right / 100
+            _cropRegionOnSensor.bottom = heightPercent * sensorActiveArray.bottom / 100
+        }
     }
 
     private fun configurePreviewSize(textureWidth: Int, textureHeight: Int) {
@@ -217,12 +308,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             // Put here to prevent Redmi Note 5 onResume bent the preview camera.
             _surfaceTexture.setDefaultBufferSize(_previewSize.height, _previewSize.width)
             val previewSurface = Surface(_surfaceTexture)
-            _requestBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            _requestBuilder.addTarget(previewSurface)
-
-            setupFlash()
-            setupBarcodeScene()
-            setupZoom()
+            _previewBuilder = _camera!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            _previewBuilder.addTarget(previewSurface)
 
             _camera!!.createCaptureSession(mutableListOf(previewSurface), _sessionCallback, null)
 
@@ -231,15 +318,15 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    private fun setupZoom() {
+    private fun integrateZoom() {
         val rectArray = _characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
         val max = _characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM)
         if (rectArray != null && max != null) {
             // 0.3 base on max, 0.5 = max / 2
-            val scaledZoom = 0.15 * (max - 1.0f) + 1.0f
+            val scaledZoom = 0.1 * (max - 1.0f) + 1.0f
             val rectCrop = Rect(0, 0, (rectArray.width() / scaledZoom).toInt(), (rectArray.height() / scaledZoom).toInt())
             rectCrop.offsetTo(rectArray.centerX() - rectCrop.centerX(), rectArray.centerY() - rectCrop.centerY())
-            _requestBuilder.set(CaptureRequest.SCALER_CROP_REGION, rectCrop)
+            _previewBuilder.set(CaptureRequest.SCALER_CROP_REGION, rectCrop)
         }
     }
 
@@ -281,7 +368,10 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         override fun onConfigured(session: CameraCaptureSession) {
             try {
                 _session = session
-                _session!!.setRepeatingRequest(_requestBuilder.build(), null, null)
+                integrateFlash()
+                integrateZoom()
+                integrateTouchCrop()
+                sendRepeatingRequest()
             } catch (e: CameraAccessException) {
                 throw e
             }

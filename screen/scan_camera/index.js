@@ -1,19 +1,21 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useCallback, useEffect, useLayoutEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import { View, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert } from 'react-native'
+import { View, NativeModules, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert, findNodeHandle } from 'react-native'
 import { ImgUrl } from '../../global/img_url';
 import { FlashOnOff, FlashConstant } from '../../component/flash_on_off';
 import { CropRegion } from '../../component/crop_region';
 import { MockCamera } from '../../component/mock_camera';
 import { Navigation } from '../../navigation/navigation';
 import { BarCodeCamera } from '../../component/bar_code_camera';
+const { BarCodeCameraModule } = NativeModules
 
 export const ScanCamera = props => {
 
     const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
     const [flashState, setFlash] = useState(FlashConstant.INIT)
-    const lockRef = useRef(false)
+    const refLock = useRef(false)
+    const refHandleCamera = useRef(null)
 
     function onContainerLayout(event) {
         const { width, height } = event.nativeEvent.layout;
@@ -40,19 +42,23 @@ export const ScanCamera = props => {
         setFlash(flashState)
     }
 
+    const onTouchCrop = useCallback(_ => {
+        BarCodeCameraModule.touchCrop(refHandleCamera.current)
+    })
+
     const { widthCrop, heightCrop, yCrop } = props
     const xCrop = (dimensionContainer.widthContainer - widthCrop) / 2
 
-    console.log('REnder')
     return (
         <Container onLayout={onContainerLayout}>
             {
                 dimensionContainer.widthContainer === undefined ? null :
                     <Container>
                         <BarCodeCamera
+                            onHandleNode={nodeHandle => refHandleCamera.current = nodeHandle}
                             onBarCodeRead={result => {
-                                if (!lockRef.current) {
-                                    lockRef.current = true
+                                if (!refLock.current) {
+                                    refLock.current = true
                                     Alert.alert("", result)
                                     Navigation.stackPop()
                                 }
@@ -61,6 +67,7 @@ export const ScanCamera = props => {
                             cropData={_getCropData(widthCrop, heightCrop, yCrop, xCrop)}
                             style={StyleSheet.absoluteFill} />
                         <CropRegion
+                            onTouchCrop={onTouchCrop}
                             widthContainer={dimensionContainer.widthContainer}
                             heightContainer={dimensionContainer.heightContainer}
                             widthCrop={widthCrop}

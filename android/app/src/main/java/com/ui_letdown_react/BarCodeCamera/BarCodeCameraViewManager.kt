@@ -6,6 +6,8 @@ import android.graphics.RectF
 import android.util.Log
 import android.view.ViewGroup
 import com.facebook.react.bridge.LifecycleEventListener
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
@@ -73,6 +75,12 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
     fun setCropData(view: BarCodeCameraView, cropData: String) {
         val parts = cropData.split(",").map { it.toInt() }
         view.setRectCrop(Rect(parts[0], parts[1], parts[2], parts[3]))
+    }
+
+    @ReactMethod
+    fun touchCrop(promise: Promise) {
+        promise.resolve(1)
+        Log.e("@@", "HAHA")
     }
 
     override fun onHostResume() {

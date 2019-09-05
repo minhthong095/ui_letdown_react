@@ -6,10 +6,9 @@ import android.os.AsyncTask
 import android.util.Log
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
-import java.io.File
-import java.io.FileOutputStream
 
 class BarCodeRGBAsyncTask(
+//        private val _file: File,
         private val _rawCropRect: Rect,
         private val _delegate: BarCodeAsyncTaskDelegate,
         private val _rawBmp: Bitmap,
@@ -26,22 +25,40 @@ class BarCodeRGBAsyncTask(
 
         var result: Result? = null
 
+        val croppedBmp = Bitmap.createBitmap(_rawBmp, _rawCropRect.left, _rawCropRect.top, _rawCropRect.right, _rawCropRect.bottom)
+
+//        val byteOutputStream = ByteArrayOutputStream()
+//        croppedBmp.compress(Bitmap.CompressFormat.JPEG, 100, byteOutputStream)
+//        val byteJpeg = byteOutputStream.toByteArray()
+//
+//        val out = FileOutputStream(_file)
+//        out.write(byteJpeg)
+//        out.flush()
+//        out.close()
+
+
         try {
+
             result = _barcodeReader.decodeWithState(
                     BinaryBitmap(
                             HybridBinarizer(
                                     RGBLuminanceSource(
-                                            _rawCropRect.width(), // int dataWidth
-                                            _rawCropRect.height(), // int dataHeight
-                                            rgbToLuminance(_rawBmp) // byte[] yuvData
+                                            croppedBmp.width, // int dataWidth
+                                            croppedBmp.height, // int dataHeight
+                                            rgbToLuminance(croppedBmp) // byte[] yuvData
                                     ))))
+
         } catch (e3: NotFoundException) {
             //no barcode Found
             _rawBmp.recycle()
+            croppedBmp.recycle()
         }
 
         if (!_rawBmp.isRecycled)
             _rawBmp.recycle()
+
+        if (!croppedBmp.isRecycled)
+            croppedBmp.recycle()
 
         if (result == null) return null
 
@@ -55,11 +72,11 @@ class BarCodeRGBAsyncTask(
         _delegate.onBarCodeRead(result)
     }
 
-    private fun rgbToLuminance(argb8888: Bitmap): IntArray {
-        val size = argb8888.width * argb8888.height
+    private fun rgbToLuminance(cropBmp: Bitmap): IntArray {
+        val size = cropBmp.width * cropBmp.height
         val pixels = IntArray(size)
         val luminance = IntArray(size)
-        argb8888.getPixels(pixels, 0, argb8888.width, _rawCropRect.left, _rawCropRect.top, _rawCropRect.right, _rawCropRect.bottom)
+        cropBmp.getPixels(pixels, 0, cropBmp.width, 0, 0, cropBmp.width, cropBmp.height)
 
         for (offset in 0 until size) {
             val pixel = pixels[offset]
@@ -72,4 +89,9 @@ class BarCodeRGBAsyncTask(
 
         return luminance
     }
+}
+
+interface BarCodeAsyncTaskDelegate {
+    fun onBarCodeRead(result: String?)
+    fun onPreBarCodeRead()
 }

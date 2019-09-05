@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { requireNativeComponent, StyleSheet, View } from 'react-native'
-import React, { memo } from 'react'
+import { requireNativeComponent, findNodeHandle, NativeModules } from 'react-native'
+import React, { memo, useEffect, useRef, useCallback } from 'react'
 import { FlashConstant } from '../flash_on_off';
 const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
 
@@ -14,6 +14,7 @@ export const BarCodeCamera = memo(({ ...props }) => {
 
     return (
         <BarCodeCameraView
+            ref={node => props.onHandleNode(findNodeHandle(node))}
             {...props}
             onBarCodeRead={onBarCodeRead}
         />
@@ -44,12 +45,15 @@ export const BarCodeCameraType = {
 BarCodeCamera.defaultProp = {
     barcodeTypes: [],
     onBarCodeRead: _ => { },
-    flash: FlashConstant.INIT
-
+    flash: FlashConstant.INIT,
+    cropData: null,
+    onHandleNode: node => { }
 }
 
 BarCodeCamera.propTypes = {
     barcodeTypes: PropTypes.arrayOf(PropTypes.string),
     onBarCodeRead: PropTypes.func,
-    flash: PropTypes.string
+    onHandleNode: PropTypes.func,
+    flash: PropTypes.string,
+    cropData: PropTypes.string
 }

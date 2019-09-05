@@ -37,7 +37,9 @@ class BarCodeCameraPackage : ReactPackage {
     }
 
     override fun createNativeModules(reactContext: ReactApplicationContext): MutableList<NativeModule> =
-            Collections.emptyList()
+            mutableListOf(
+                    BarCodeCameraModule(reactContext)
+            )
 
     override fun createViewManagers(reactContext: ReactApplicationContext): MutableList<ViewManager<*, *>> =
             mutableListOf(
