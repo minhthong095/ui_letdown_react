@@ -24,6 +24,8 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.params.MeteringRectangle
 import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
+import androidx.core.graphics.toRect
+import androidx.core.graphics.toRectF
 
 
 class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(_context), BarCodeAsyncTaskDelegate, TextureView.SurfaceTextureListener {
@@ -42,12 +44,11 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _taskBarCodeRead: AsyncTask<Void, Void, String>? = null
     private val _barcodeFormatReader = MultiFormatReader()
     private lateinit var _surfaceTexture: SurfaceTexture
-    private var _rawCropRect = Rect()
-    private var _configureCropRect = Rect()
+    private var _rawCropRect = RectF()
     private var _flashMode = FLASH_INIT
     private lateinit var _characteristics: CameraCharacteristics
     private val _exposureValue = -2
-    private val _cropRegionOnSensor = Rect()
+    private val _cropRegionOnSensor = RectF()
 
     init {
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
@@ -59,11 +60,11 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        if (!_lockScan) {
-//            val file = File(_context.externalCacheDir, "zoom.jpg")
-//            file.createNewFile()
-            _taskBarCodeRead = BarCodeRGBAsyncTask(_configureCropRect, this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
-        }
+//        if (!_/*lockScan) {
+////            val file = File(_context.externalCacheDir, "zoom.jpg")
+////            file.createNewFile()
+//            _taskBarCodeRead = BarCodeRGBAsyncTask(_configureCropRect, this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
+//        }*/
     }
 
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
@@ -76,7 +77,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     }
 
     // Raw crop rect, before converting to follow preview ratio
-    fun setRectCrop(rawRect: Rect) {
+    fun setRectCrop(rawRect: RectF) {
         _rawCropRect = rawRect
     }
 
@@ -108,17 +109,18 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private fun integrateTriggerAeAf() {
         _previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_AUTO)
         _previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START)
-        _previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
     }
 
     private fun integrateIdleAeAf() {
         _previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_IDLE)
-        _previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE)
     }
 
     private fun integrateTouchCrop() {
-        val _cropRegionOnSensorX = Rect(0,0,100,100)
-        val arrayMetering = arrayOf(MeteringRectangle(_cropRegionOnSensorX, 300))
+//        val _cropRegionOnSensorX = Rect(1000,1000,1500,1500)
+
+        val rect = Rect()
+        _cropRegionOnSensor.round(rect)
+        val arrayMetering = arrayOf(MeteringRectangle(rect, 1000))
         _previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
         _previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
         _previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON)
@@ -200,7 +202,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
                 _characteristics = characteristics
 
                 configurePreviewSize(width, height)
-                configureCropRect(width, height)
+//                configureCropRect(width, height)
                 configureTransform(width, height)
                 configureAfAeRegion(width, height)
 
@@ -244,30 +246,20 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         }
     }
 
-    // Must places after _previewSize has been configured.
-    // From raw rect on TextureView into convert rect in preview scale.
-    private fun configureCropRect(textureWidth: Int, textureHeight: Int) {
-        val widthScale = textureWidth.toFloat() / _previewSize.width.toFloat()
-        val heightScale = textureHeight.toFloat() / _previewSize.height.toFloat()
-        _configureCropRect.left = (_rawCropRect.left / widthScale).toInt()
-        _configureCropRect.right = (_rawCropRect.right / widthScale).toInt()
-        _configureCropRect.top = (_rawCropRect.top / heightScale).toInt()
-        _configureCropRect.bottom = (_rawCropRect.bottom / heightScale).toInt()
-    }
 
     private fun configureAfAeRegion(textureWidth: Int, textureHeight: Int) {
 
-        val sensorActiveArray = _characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        // Crop region start at top-left, but its behave on top-right on preview,
+        // because the image data turn rotate 90deg clockwise.
 
+        val sensorActiveArray = _characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
         if (sensorActiveArray != null) {
-            val xPercent = _rawCropRect.left * 100 / textureWidth
-            val yPercent = _rawCropRect.top * 100 / textureHeight
-            val widthPercent = _rawCropRect.right * 100 / textureHeight
-            val heightPercent = _rawCropRect.top * 100 / textureHeight
-            _cropRegionOnSensor.left = xPercent * sensorActiveArray.left / 100
-            _cropRegionOnSensor.top = yPercent * sensorActiveArray.top / 100
-            _cropRegionOnSensor.right = widthPercent * sensorActiveArray.right / 100
-            _cropRegionOnSensor.bottom = heightPercent * sensorActiveArray.bottom / 100
+            val matrix = Matrix()
+            matrix.setRectToRect(
+                    RectF(0f,0f, textureWidth.toFloat(), textureHeight.toFloat()).turnSensorRect(),
+                    RectF(sensorActiveArray),
+                    Matrix.ScaleToFit.FILL) // Map  preview coordinates to sensor coordinates
+            matrix.mapRect(_cropRegionOnSensor, _rawCropRect.turnSensorRect())
         }
     }
 
@@ -368,8 +360,8 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
         override fun onConfigured(session: CameraCaptureSession) {
             try {
                 _session = session
-                integrateFlash()
-                integrateZoom()
+//                integrateFlash()
+//                integrateZoom()
                 integrateTouchCrop()
                 sendRepeatingRequest()
             } catch (e: CameraAccessException) {
@@ -424,4 +416,16 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private class Conditioner : Comparator<Size> {
         override fun compare(o1: Size?, o2: Size?): Int = o1!!.width * o1.height - o2!!.width * o2.height
     }
+}
+
+fun RectF.turnSensorRect(): RectF {
+    val result = RectF(this)
+    result.left = this.top
+    result.top = this.left
+    result.right = this.height() + result.left
+    result.bottom = this.width() + result.top
+//    val matrix = Matrix()
+//    matrix.postRotate(90f)
+//    matrix.mapRect(result)
+    return result
 }

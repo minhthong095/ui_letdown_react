@@ -71,10 +71,15 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
     }
 
     // JS will handle wrong data format. This method will be considered perfect.
+    // Crop data must follow Rect rules ( right > left, bottom > top )
     @ReactProp(name = "cropData")
     fun setCropData(view: BarCodeCameraView, cropData: String) {
         val parts = cropData.split(",").map { it.toInt() }
-        view.setRectCrop(Rect(parts[0], parts[1], parts[2], parts[3]))
+        view.setRectCrop(RectF(
+                parts[0].toFloat(),
+                parts[1].toFloat(),
+                parts[0].toFloat() + parts[2].toFloat(),
+                parts[1].toFloat() + parts[3].toFloat()))
     }
 
     @ReactMethod
