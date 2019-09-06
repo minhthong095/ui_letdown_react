@@ -47,7 +47,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
     private var _rawCropRect = RectF()
     private var _flashMode = FLASH_INIT
     private lateinit var _characteristics: CameraCharacteristics
-    private val _exposureValue = -2
     private val _cropRegionOnSensor = RectF()
 
     init {
@@ -210,28 +209,6 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
             } catch (er: CameraAccessException) {
                 throw er
             }
-        }
-    }
-
-    // Range [0,0] indicates that exposure compensation is not supported.
-    // Must be place after _previewBuilder
-    private fun setupExposeCompensation() {
-        val range = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
-        val step = _characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP)
-        if (step != null && range != null && range.lower != 0) {
-            _previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
-            _previewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, (_exposureValue * step.denominator) / step.numerator)
-        }
-    }
-
-    // For lower brightness to easy detect shapes. Adjust right on camera sensor.
-    // But have to hide it because Redmi Note 5 also not support REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR yet.
-    private fun setupCustomAEMode() {
-        val availableCapabilities = _characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
-        if (availableCapabilities != null && availableCapabilities.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR)) {
-            val exporeTimeRange = _characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
-            val isoRange = _characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
-            val frameDurationMax = _characteristics.get(CameraCharacteristics.SENSOR_INFO_MAX_FRAME_DURATION)
         }
     }
 
