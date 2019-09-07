@@ -1,15 +1,14 @@
 package com.ui_letdown_react.BarCodeCamera
 
 import android.graphics.Bitmap
-import android.graphics.Rect
+import android.graphics.RectF
 import android.os.AsyncTask
 import android.util.Log
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
 
 class BarCodeRGBAsyncTask(
-//        private val _file: File,
-        private val _rawCropRect: Rect,
+        private val _scaleCrop: RectF,
         private val _delegate: BarCodeAsyncTaskDelegate,
         private val _rawBmp: Bitmap,
         private val _barcodeReader: MultiFormatReader
@@ -25,20 +24,14 @@ class BarCodeRGBAsyncTask(
 
         var result: Result? = null
 
-        val croppedBmp = Bitmap.createBitmap(_rawBmp, _rawCropRect.left, _rawCropRect.top, _rawCropRect.right, _rawCropRect.bottom)
-
-//        val byteOutputStream = ByteArrayOutputStream()
-//        croppedBmp.compress(Bitmap.CompressFormat.JPEG, 100, byteOutputStream)
-//        val byteJpeg = byteOutputStream.toByteArray()
-//
-//        val out = FileOutputStream(_file)
-//        out.write(byteJpeg)
-//        out.flush()
-//        out.close()
-
+        val croppedBmp = Bitmap.createBitmap(
+                _rawBmp,
+                _scaleCrop.left.toInt(),
+                _scaleCrop.top.toInt(),
+                _scaleCrop.width().toInt(),
+                _scaleCrop.height().toInt())
 
         try {
-
             result = _barcodeReader.decodeWithState(
                     BinaryBitmap(
                             HybridBinarizer(

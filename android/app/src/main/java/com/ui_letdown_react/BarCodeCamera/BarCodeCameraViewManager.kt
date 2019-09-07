@@ -1,6 +1,7 @@
 package com.ui_letdown_react.BarCodeCamera
 
 import android.annotation.SuppressLint
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Log
@@ -75,11 +76,14 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
     @ReactProp(name = "cropData")
     fun setCropData(view: BarCodeCameraView, cropData: String) {
         val parts = cropData.split(",").map { it.toInt() }
-        view.setRectCrop(RectF(
+
+        val sensorCropRect = RectF(
                 parts[0].toFloat(),
                 parts[1].toFloat(),
                 parts[0].toFloat() + parts[2].toFloat(),
-                parts[1].toFloat() + parts[3].toFloat()))
+                parts[1].toFloat() + parts[3].toFloat())
+
+        view.setRectCrop(sensorCropRect)
     }
 
     @ReactMethod
