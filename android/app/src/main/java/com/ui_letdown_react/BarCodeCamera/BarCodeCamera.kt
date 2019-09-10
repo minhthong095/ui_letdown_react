@@ -60,7 +60,7 @@ class BarCodeCameraView(private val _context: ThemedReactContext) : TextureView(
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
         if (!_lockScan) {
-            _taskBarCodeRead = BarCodeRGBAsyncTask(_rawCropRect.turnSensorRect(), this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
+            _taskBarCodeRead = BarCodeRGBAsyncTask(_scaledCrop.turnSensorRect(), this, getBitmap(_previewSize.width, _previewSize.height), _barcodeFormatReader).execute()
         }
     }
 

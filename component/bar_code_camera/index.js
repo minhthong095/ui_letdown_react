@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
-import { requireNativeComponent, findNodeHandle, NativeModules } from 'react-native'
+import { requireNativeComponent, findNodeHandle, StyleSheet, NativeModules } from 'react-native'
 import React, { memo, useEffect, useRef, useCallback } from 'react'
 import { FlashConstant } from '../flash_on_off';
-const BarCodeCameraView = requireNativeComponent('BarCodeCameraView')
+const Camera = requireNativeComponent('BarCodeCamera')
+
+const Manager = NativeModules.BarCodeCameraModule || NativeModules.BarCodeCameraManager
 
 export const BarCodeCamera = memo(({ ...props }) => {
 
@@ -13,10 +15,11 @@ export const BarCodeCamera = memo(({ ...props }) => {
     }
 
     return (
-        <BarCodeCameraView
-            ref={node => props.onHandleNode(findNodeHandle(node))}
+        <Camera
+            ref={node => props.receiveTouchCropFunc(() => Manager.touchCrop(findNodeHandle(node)))}
             {...props}
             onBarCodeRead={onBarCodeRead}
+            style={StyleSheet.absoluteFill}
         />
     )
 })
@@ -45,15 +48,15 @@ export const BarCodeCameraType = {
 BarCodeCamera.defaultProp = {
     barcodeTypes: [],
     onBarCodeRead: _ => { },
-    flash: FlashConstant.INIT,
+    flash: FlashConstant.OFF,
     cropData: null,
-    onHandleNode: node => { }
+    receiveTouchCropFunc: func => { }
 }
 
 BarCodeCamera.propTypes = {
     barcodeTypes: PropTypes.arrayOf(PropTypes.string),
     onBarCodeRead: PropTypes.func,
-    onHandleNode: PropTypes.func,
+    receiveTouchCropFunc: PropTypes.func,
     flash: PropTypes.string,
     cropData: PropTypes.string
 }

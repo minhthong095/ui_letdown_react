@@ -17,7 +17,7 @@ import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.annotations.ReactPropGroup
 import com.google.zxing.BarcodeFormat
 
-class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), LifecycleEventListener {
+class BarCodeCameraManager : SimpleViewManager<BarCodeCameraView>(), LifecycleEventListener {
 
     enum class Event(val value: String) {
         ON_BARCODE_READ("onBarCodeRead")
@@ -27,7 +27,7 @@ class BarCodeCameraViewManager : SimpleViewManager<BarCodeCameraView>(), Lifecyc
     private lateinit var _context: ThemedReactContext
     private var _isPause = false
 
-    override fun getName(): String = "BarCodeCameraView"
+    override fun getName(): String = "BarCodeCamera"
 
     override fun createViewInstance(reactContext: ThemedReactContext): BarCodeCameraView {
         _context = reactContext

@@ -1,19 +1,12 @@
 package com.ui_letdown_react.BarCodeCamera
 
-import android.util.Log
-import android.view.View
-import android.view.ViewGroup
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.ReactShadowNode
-import com.facebook.react.uimanager.SimpleViewManager
-import com.facebook.react.uimanager.ViewGroupManager
 import com.facebook.react.uimanager.ViewManager
 import com.google.zxing.BarcodeFormat
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 
 class BarCodeCameraPackage : ReactPackage {
 
@@ -43,6 +36,6 @@ class BarCodeCameraPackage : ReactPackage {
 
     override fun createViewManagers(reactContext: ReactApplicationContext): MutableList<ViewManager<*, *>> =
             mutableListOf(
-                    BarCodeCameraViewManager()
+                    BarCodeCameraManager()
             )
 }

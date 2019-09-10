@@ -1,27 +1,28 @@
 import styled from 'styled-components'
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native'
+import { View, SafeAreaView, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PermissionsAndroid, NativeModules, AppState, requireNativeComponent } from 'react-native';
 import { Navigation, Stack } from '../../navigation/navigation';
-import { BarCodeCamera, BarCodeCameraType } from '../../component/bar_code_camera';
 
 const { OpenSetting } = NativeModules
 
 export const Scan = () => {
 
-    const [isAskPermission, setAskPermission] = useState(false);
-    const [isEnableScanBtn, setEnableScanBtn] = useState(false)
+    const [isAskPermission, setAskPermission] = useState(false)
+    const [isEnableScanBtn, setEnableScanBtn] = useState(Platform.OS == 'ios' ? true : false)
 
     const isAlreadyInit = useRef(null)
 
     useEffect(_ => {
-        requestCameraCheckFirstime();
-        AppState.addEventListener('change', (state) => {
-            if (state == 'active' && isAlreadyInit.current != null)
-                checkCameraPermission()
+        if (Platform.OS != 'ios') {
+            requestCameraCheckFirstime();
+            AppState.addEventListener('change', (state) => {
+                if (state == 'active' && isAlreadyInit.current != null)
+                    checkCameraPermission()
 
-            isAlreadyInit.current = true
-        })
+                isAlreadyInit.current = true
+            })
+        }
     }, []);
 
     const checkCameraPermission = useCallback(_ => {
@@ -89,7 +90,6 @@ export const Scan = () => {
                     </PermissionView>
                 }
             </ContainerVisualCamera>
-            <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: 'green' }} />
             <TouchableOpacity activeOpacity={_getActiveScanBtn} onPress={_openCamera}>
                 <ScanButton>
                     <TextButton>SCAN</TextButton>
@@ -123,14 +123,7 @@ const AskPermissionText = styled(Text)`
             color: black;
         `
 
-const VisualCamera = styled(View)`
-            height: 200;
-            width: 200;
-            background-color: green;
-            justify-content: center;
-            align-items: center;
-        `
-const Container = styled(View)`
+const Container = styled(SafeAreaView)`
             flex: 1;
             background-color: white;
             justify-content: flex-end;

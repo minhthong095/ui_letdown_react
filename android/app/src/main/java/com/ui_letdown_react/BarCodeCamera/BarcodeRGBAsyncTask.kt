@@ -10,7 +10,7 @@ import com.google.zxing.common.HybridBinarizer
 class BarCodeRGBAsyncTask(
         private val _scaleCrop: RectF,
         private val _delegate: BarCodeAsyncTaskDelegate,
-        private val _rawBmp: Bitmap,
+        private val _rawBmpPreview: Bitmap,
         private val _barcodeReader: MultiFormatReader
 
 ) : AsyncTask<Void, Void, String>() {
@@ -25,7 +25,7 @@ class BarCodeRGBAsyncTask(
         var result: Result? = null
 
         val croppedBmp = Bitmap.createBitmap(
-                _rawBmp,
+                _rawBmpPreview,
                 _scaleCrop.left.toInt(),
                 _scaleCrop.top.toInt(),
                 _scaleCrop.width().toInt(),
@@ -43,12 +43,12 @@ class BarCodeRGBAsyncTask(
 
         } catch (e3: NotFoundException) {
             //no barcode Found
-            _rawBmp.recycle()
+            _rawBmpPreview.recycle()
             croppedBmp.recycle()
         }
 
-        if (!_rawBmp.isRecycled)
-            _rawBmp.recycle()
+        if (!_rawBmpPreview.isRecycled)
+            _rawBmpPreview.recycle()
 
         if (!croppedBmp.isRecycled)
             croppedBmp.recycle()

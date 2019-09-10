@@ -16,6 +16,13 @@
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* ui_letdown_reactTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ui_letdown_reactTests.m */; };
+		3EA836B4095E2DCB69496504 /* libPods-ui_letdown_react.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF4DE57DC5A7C3C2E0E44AEB /* libPods-ui_letdown_react.a */; };
+		47FA172C1D7E5D9C483F87EC /* libPods-ui_letdown_reactTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 029013E9F4BC06E7ED70DCB3 /* libPods-ui_letdown_reactTests.a */; };
+		B44AB63D97906A7CD7938497 /* libPods-ui_letdown_react-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD0C07234164EFFF5A653893 /* libPods-ui_letdown_react-tvOS.a */; };
+		F9316320AD0F85517E9D5AF7 /* libPods-ui_letdown_react-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79C8C45952B6C02CC938BC04 /* libPods-ui_letdown_react-tvOSTests.a */; };
+		FA1C345E23274BAE00EE6B89 /* PaddingLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1C345D23274BAE00EE6B89 /* PaddingLabel.swift */; };
+		FA787C3D2324F7F800412FD3 /* BarCodeCameraManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FA787C3C2324F7F800412FD3 /* BarCodeCameraManager.m */; };
+		FABE634E2327842300E17EC3 /* BarCodeCameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABE634D2327842300E17EC3 /* BarCodeCameraManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +47,7 @@
 		00E356EE1AD99517003FC87E /* ui_letdown_reactTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ui_letdown_reactTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* ui_letdown_reactTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ui_letdown_reactTests.m; sourceTree = "<group>"; };
+		029013E9F4BC06E7ED70DCB3 /* libPods-ui_letdown_reactTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ui_letdown_reactTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* ui_letdown_react.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ui_letdown_react.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ui_letdown_react/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = ui_letdown_react/AppDelegate.m; sourceTree = "<group>"; };
@@ -49,8 +57,23 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ui_letdown_react/main.m; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* ui_letdown_react-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ui_letdown_react-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* ui_letdown_react-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ui_letdown_react-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F2DF92740F6B63AFB6A2CAB /* Pods-ui_letdown_react-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react-tvOS/Pods-ui_letdown_react-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		55522E33BE9C059D5B420E48 /* Pods-ui_letdown_reactTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_reactTests.release.xcconfig"; path = "Target Support Files/Pods-ui_letdown_reactTests/Pods-ui_letdown_reactTests.release.xcconfig"; sourceTree = "<group>"; };
+		6508C8981903D069498FC7F6 /* Pods-ui_letdown_reactTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_reactTests.debug.xcconfig"; path = "Target Support Files/Pods-ui_letdown_reactTests/Pods-ui_letdown_reactTests.debug.xcconfig"; sourceTree = "<group>"; };
+		79C8C45952B6C02CC938BC04 /* libPods-ui_letdown_react-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ui_letdown_react-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A23A8933AF99F9A483F5A9D /* Pods-ui_letdown_react.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react.release.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react/Pods-ui_letdown_react.release.xcconfig"; sourceTree = "<group>"; };
+		8ED2224CA38D9D5A73A351B8 /* Pods-ui_letdown_react-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react-tvOSTests/Pods-ui_letdown_react-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		94AA9B1E376DDB1AFC279A42 /* Pods-ui_letdown_react-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react-tvOS.release.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react-tvOS/Pods-ui_letdown_react-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		BF4DE57DC5A7C3C2E0E44AEB /* libPods-ui_letdown_react.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ui_letdown_react.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1144EA48058D39A21AD1D83 /* Pods-ui_letdown_react-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react-tvOSTests/Pods-ui_letdown_react-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C9D0367DBDE1E141418D520A /* Pods-ui_letdown_react.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ui_letdown_react.debug.xcconfig"; path = "Target Support Files/Pods-ui_letdown_react/Pods-ui_letdown_react.debug.xcconfig"; sourceTree = "<group>"; };
+		CD0C07234164EFFF5A653893 /* libPods-ui_letdown_react-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ui_letdown_react-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+		FA1C345D23274BAE00EE6B89 /* PaddingLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddingLabel.swift; sourceTree = "<group>"; };
+		FA764EBC2324B0D300274063 /* ui_letdown_react-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ui_letdown_react-Bridging-Header.h"; sourceTree = "<group>"; };
+		FA787C3C2324F7F800412FD3 /* BarCodeCameraManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BarCodeCameraManager.m; sourceTree = "<group>"; };
+		FABE634D2327842300E17EC3 /* BarCodeCameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarCodeCameraManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47FA172C1D7E5D9C483F87EC /* libPods-ui_letdown_reactTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3EA836B4095E2DCB69496504 /* libPods-ui_letdown_react.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +97,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B44AB63D97906A7CD7938497 /* libPods-ui_letdown_react-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9316320AD0F85517E9D5AF7 /* libPods-ui_letdown_react-tvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +132,9 @@
 		13B07FAE1A68108700A75B9A /* ui_letdown_react */ = {
 			isa = PBXGroup;
 			children = (
+				FA1C345C23274B9600EE6B89 /* CustomView */,
+				FA764EBB2324B0BF00274063 /* BarCodeCamera */,
+				FA764EBC2324B0D300274063 /* ui_letdown_react-Bridging-Header.h */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -121,8 +151,27 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
+				BF4DE57DC5A7C3C2E0E44AEB /* libPods-ui_letdown_react.a */,
+				CD0C07234164EFFF5A653893 /* libPods-ui_letdown_react-tvOS.a */,
+				79C8C45952B6C02CC938BC04 /* libPods-ui_letdown_react-tvOSTests.a */,
+				029013E9F4BC06E7ED70DCB3 /* libPods-ui_letdown_reactTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		59471E112513D4C376EC7361 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				C9D0367DBDE1E141418D520A /* Pods-ui_letdown_react.debug.xcconfig */,
+				8A23A8933AF99F9A483F5A9D /* Pods-ui_letdown_react.release.xcconfig */,
+				4F2DF92740F6B63AFB6A2CAB /* Pods-ui_letdown_react-tvOS.debug.xcconfig */,
+				94AA9B1E376DDB1AFC279A42 /* Pods-ui_letdown_react-tvOS.release.xcconfig */,
+				C1144EA48058D39A21AD1D83 /* Pods-ui_letdown_react-tvOSTests.debug.xcconfig */,
+				8ED2224CA38D9D5A73A351B8 /* Pods-ui_letdown_react-tvOSTests.release.xcconfig */,
+				6508C8981903D069498FC7F6 /* Pods-ui_letdown_reactTests.debug.xcconfig */,
+				55522E33BE9C059D5B420E48 /* Pods-ui_letdown_reactTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -140,6 +189,7 @@
 				00E356EF1AD99517003FC87E /* ui_letdown_reactTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				59471E112513D4C376EC7361 /* Pods */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -157,6 +207,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FA1C345C23274B9600EE6B89 /* CustomView */ = {
+			isa = PBXGroup;
+			children = (
+				FA1C345D23274BAE00EE6B89 /* PaddingLabel.swift */,
+			);
+			name = CustomView;
+			sourceTree = "<group>";
+		};
+		FA764EBB2324B0BF00274063 /* BarCodeCamera */ = {
+			isa = PBXGroup;
+			children = (
+				FA787C3C2324F7F800412FD3 /* BarCodeCameraManager.m */,
+				FABE634D2327842300E17EC3 /* BarCodeCameraManager.swift */,
+			);
+			path = BarCodeCamera;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -164,6 +231,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ui_letdown_reactTests" */;
 			buildPhases = (
+				6581DF7F45F56752517679A7 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
@@ -182,6 +250,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ui_letdown_react" */;
 			buildPhases = (
+				CE9C91679C8FA572BF9E32C4 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
@@ -193,7 +262,7 @@
 			dependencies = (
 			);
 			name = ui_letdown_react;
-			productName = "ui_letdown_react";
+			productName = ui_letdown_react;
 			productReference = 13B07F961A680F5B00A75B9A /* ui_letdown_react.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -201,6 +270,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ui_letdown_react-tvOS" */;
 			buildPhases = (
+				566D6B11614871FB1EDB3230 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F122414F3F0027D42C /* Start Packager */,
 				2D02E4771E0B4A5D006451C7 /* Sources */,
 				2D02E4781E0B4A5D006451C7 /* Frameworks */,
@@ -220,6 +290,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "ui_letdown_react-tvOSTests" */;
 			buildPhases = (
+				F8FD833C346BBB60D4FDD2A0 /* [CP] Check Pods Manifest.lock */,
 				2D02E48C1E0B4A5D006451C7 /* Sources */,
 				2D02E48D1E0B4A5D006451C7 /* Frameworks */,
 				2D02E48E1E0B4A5D006451C7 /* Resources */,
@@ -247,6 +318,9 @@
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
+					13B07F861A680F5B00A75B9A = {
+						LastSwiftMigration = 1020;
+					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
@@ -263,6 +337,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -342,6 +417,94 @@
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
 		};
+		566D6B11614871FB1EDB3230 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ui_letdown_react-tvOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6581DF7F45F56752517679A7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ui_letdown_reactTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CE9C91679C8FA572BF9E32C4 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ui_letdown_react-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F8FD833C346BBB60D4FDD2A0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ui_letdown_react-tvOSTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -395,7 +558,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA1C345E23274BAE00EE6B89 /* PaddingLabel.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				FA787C3D2324F7F800412FD3 /* BarCodeCameraManager.m in Sources */,
+				FABE634E2327842300E17EC3 /* BarCodeCameraManager.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -447,7 +613,9 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6508C8981903D069498FC7F6 /* Pods-ui_letdown_reactTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -469,7 +637,9 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 55522E33BE9C059D5B420E48 /* Pods-ui_letdown_reactTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = ui_letdown_reactTests/Info.plist;
@@ -488,11 +658,14 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C9D0367DBDE1E141418D520A /* Pods-ui_letdown_react.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				INFOPLIST_FILE = ui_letdown_react/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -501,16 +674,22 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ui_letdown_react;
+				SWIFT_OBJC_BRIDGING_HEADER = "ui_letdown_react-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8A23A8933AF99F9A483F5A9D /* Pods-ui_letdown_react.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = ui_letdown_react/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -519,12 +698,15 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = ui_letdown_react;
+				SWIFT_OBJC_BRIDGING_HEADER = "ui_letdown_react-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
 		2D02E4971E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4F2DF92740F6B63AFB6A2CAB /* Pods-ui_letdown_react-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -552,6 +734,7 @@
 		};
 		2D02E4981E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 94AA9B1E376DDB1AFC279A42 /* Pods-ui_letdown_react-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -579,6 +762,7 @@
 		};
 		2D02E4991E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C1144EA48058D39A21AD1D83 /* Pods-ui_letdown_react-tvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -605,6 +789,7 @@
 		};
 		2D02E49A1E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8ED2224CA38D9D5A73A351B8 /* Pods-ui_letdown_react-tvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -679,6 +864,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 			};
 			name = Debug;
 		};
@@ -724,6 +910,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

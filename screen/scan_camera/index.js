@@ -1,21 +1,19 @@
 import React, { useState, useRef, useCallback, useEffect, useLayoutEffect } from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import { View, NativeModules, Image, TouchableOpacity, StyleSheet, PixelRatio, Alert, findNodeHandle } from 'react-native'
+import { View, Text, SafeAreaView, Image, TouchableOpacity, Platform, PixelRatio, Alert, findNodeHandle } from 'react-native'
 import { ImgUrl } from '../../global/img_url';
 import { FlashOnOff, FlashConstant } from '../../component/flash_on_off';
 import { CropRegion } from '../../component/crop_region';
-import { MockCamera } from '../../component/mock_camera';
 import { Navigation } from '../../navigation/navigation';
 import { BarCodeCamera } from '../../component/bar_code_camera';
-const { BarCodeCameraModule } = NativeModules
 
 export const ScanCamera = props => {
 
     const [dimensionContainer, setDimensionContainer] = useState({ widthContainer: undefined, heightContainer: undefined })
     const [flashState, setFlash] = useState(FlashConstant.INIT)
     const refLock = useRef(false)
-    const refHandleCamera = useRef(null)
+    const refFuncCamera = useRef(null)
 
     function onContainerLayout(event) {
         const { width, height } = event.nativeEvent.layout;
@@ -43,7 +41,7 @@ export const ScanCamera = props => {
     }
 
     const onTouchCrop = useCallback(_ => {
-        BarCodeCameraModule.touchCrop(refHandleCamera.current)
+        refFuncCamera.current()
     })
 
     const { widthCrop, heightCrop, yCrop } = props
@@ -55,7 +53,7 @@ export const ScanCamera = props => {
                 dimensionContainer.widthContainer === undefined ? null :
                     <Container>
                         <BarCodeCamera
-                            onHandleNode={nodeHandle => refHandleCamera.current = nodeHandle}
+                            receiveTouchCropFunc={funcTouchCrop => refFuncCamera.current = funcTouchCrop}
                             onBarCodeRead={result => {
                                 if (!refLock.current) {
                                     refLock.current = true
@@ -65,16 +63,25 @@ export const ScanCamera = props => {
                             }}
                             flash={flashState}
                             cropData={_getCropData(widthCrop, heightCrop, yCrop, xCrop)}
-                            style={StyleSheet.absoluteFill} />
-                        <CropRegion
-                            onTouchCrop={onTouchCrop}
-                            widthContainer={dimensionContainer.widthContainer}
-                            heightContainer={dimensionContainer.heightContainer}
-                            widthCrop={widthCrop}
-                            heightCrop={heightCrop}
-                            xCrop={xCrop}
-                            yCrop={yCrop}
                         />
+                        {
+                            Platform.OS == "ios" ?
+                                <ContainerButtonJs>
+                                    <TouchableButtonJs onPress={_ => onTouchCrop()}>
+                                        <TextJs>Touch Crop from JS</TextJs>
+                                    </TouchableButtonJs>
+                                </ContainerButtonJs>
+                                :
+                                <CropRegion
+                                    onTouchCrop={onTouchCrop}
+                                    widthContainer={dimensionContainer.widthContainer}
+                                    heightContainer={dimensionContainer.heightContainer}
+                                    widthCrop={widthCrop}
+                                    heightCrop={heightCrop}
+                                    xCrop={xCrop}
+                                    yCrop={yCrop}
+                                />
+                        }
                         <TouchableOpacityAbort onPress={_ => { Navigation.stackPop() }}>
                             <AbortX source={ImgUrl.ABORT_X} />
                         </TouchableOpacityAbort>
@@ -101,10 +108,26 @@ const AbortX = styled(Image)`
     width: 36;
     height: 36
 `
-const Container = styled(View)`
+const Container = styled(SafeAreaView)`
     flex: 1;
     flex-direction: row;
     background-color: black;
+`
+
+const TextJs = styled(Text)`
+    color: white;
+    padding: 20px;
+    font-size: 18;
+`
+
+const TouchableButtonJs = styled(TouchableOpacity)`
+    background-color: red;
+`
+const ContainerButtonJs = styled(View)`
+    width: 100%;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
 `
 
 ScanCamera.propTypes = {
