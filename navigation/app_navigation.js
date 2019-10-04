@@ -2,7 +2,6 @@ import { createStackNavigator } from 'react-navigation'
 import { Scan } from '../screen/scan';
 import { ScanCamera } from '../screen/scan_camera';
 import { Stack } from './navigation';
-import { ScanCameraLibrary } from '../screen/scan-camera-library';
 
 const MainStack = createStackNavigator({
     [Stack.Scan]: { screen: Scan },
