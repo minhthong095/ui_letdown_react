@@ -1,5 +1,7 @@
 # UI Letdown React
 React Native QR Code app with Camera2 API from Android and Zxing library supported
+![](gif/main.gif)
+![](gif/second.gif)
 
 ## Install
 ### iOS
